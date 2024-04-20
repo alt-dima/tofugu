@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/alt-dima/tofugu/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -27,22 +28,38 @@ var cookCmd = &cobra.Command{
 		}
 
 		cmdToExec := viper.GetString("defaults.cmd_to_exec")
-		// cmdTempDir, err := os.MkdirTemp("", "tofugu")
-		// if err != nil {
-		// 	log.Fatalf("MkdirTemp failed with %s\n", err)
-		// }
 
-		// command := exec.Command(mountCmd, mountArgs...)
-		// output, err := command.CombinedOutput()
+		currentDir, _ := os.Getwd()
 
 		tofiName, _ := cmd.Flags().GetString("tofi")
 		orgName, _ := cmd.Flags().GetString("org")
-		tofiPath := viper.GetString("defaults.tofies_path") + "/" + orgName + "/" + tofiName
+		dimensionsArgs, _ := cmd.Flags().GetStringSlice("dimension")
+		tofiPath := currentDir + "/" + viper.GetString("defaults.tofies_path") + "/" + orgName + "/" + tofiName
 
-		log.Println("ToFuGu starting OpenTofu with args: " + strings.Join(args, " "))
-		execChildCommand := exec.Command(cmdToExec, args...)
-		execChildCommand.Dir = tofiPath
+		manifest := utils.ParseTofiManifest(tofiPath + "/tofi_manifest.json")
+
+		log.Println(manifest.Dimensions)
+		parsedDimensions := utils.ParseDimensions(manifest.Dimensions, dimensionsArgs)
+
+		var stateS3Path string
+		for _, dimension := range manifest.Dimensions {
+			stateS3Path = stateS3Path + parsedDimensions[dimension] + "/"
+		}
+
+		cmdArgs := args
+		if args[0] == "init" {
+			cmdArgs = append(cmdArgs, "-backend-config=bucket=asu-tfstates")
+			cmdArgs = append(cmdArgs, "-backend-config=key="+orgName+stateS3Path+tofiName+".tfstate")
+			cmdArgs = append(cmdArgs, "-backend-config=region=us-east-2")
+		}
+
+		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+viper.GetString("defaults.shared_modules_path"), orgName+stateS3Path+tofiName)
+
+		log.Println("ToFuGu starting OpenTofu with args: " + strings.Join(cmdArgs, " "))
+		execChildCommand := exec.Command(cmdToExec, cmdArgs...)
+		execChildCommand.Dir = cmdWorkTempDir
 		execChildCommand.Env = os.Environ()
+		execChildCommand.Stdin = os.Stdin
 		execChildCommand.Stdout = os.Stdout
 		execChildCommand.Stderr = os.Stderr
 		err := execChildCommand.Start()
@@ -65,6 +82,10 @@ var cookCmd = &cobra.Command{
 			exitCodeFinal = 0
 		} else {
 			exitCodeFinal = execChildCommand.ProcessState.ExitCode()
+		}
+
+		if args[0] == "apply" {
+			os.RemoveAll(cmdWorkTempDir)
 		}
 
 		log.Printf("OpenTofu finished with code %v", exitCodeFinal)
