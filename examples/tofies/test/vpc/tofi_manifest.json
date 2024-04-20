@@ -1,0 +1,6 @@
+{
+    "allowed_accounts": [
+        "test"
+    ],
+    "allowed_dimensions": ["datacenter"]
+}
