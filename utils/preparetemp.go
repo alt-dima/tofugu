@@ -1,17 +1,15 @@
 package utils
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"log"
 	"os"
 	"os/exec"
 )
 
 func PrepareTemp(tofiPath string, sharedModulesPath string, tmpFolderName string) string {
-	cmdTempDir := os.TempDir() + "/tofugu" + getMD5Hash(tmpFolderName)
+	cmdTempDir := os.TempDir() + "/tofugu" + GetMD5Hash(tmpFolderName)
 
-	command := exec.Command("cp", "-R", tofiPath+"/.", cmdTempDir)
+	command := exec.Command("rsync", "-a", "--delete", "--exclude=.terraform*", "--exclude=tofi_manifest.json", tofiPath+"/.", cmdTempDir)
 	output, err := command.CombinedOutput()
 	if err != nil {
 		os.RemoveAll(cmdTempDir)
@@ -28,10 +26,4 @@ func PrepareTemp(tofiPath string, sharedModulesPath string, tmpFolderName string
 	}
 
 	return cmdTempDir
-}
-
-func getMD5Hash(text string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(text))
-	return hex.EncodeToString(hasher.Sum(nil))
 }

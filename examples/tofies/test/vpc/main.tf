@@ -1,4 +1,5 @@
+//use shared-module
 module "vpc" {
   source = "./shared-modules/create_vpc"
-  cidr = "10.1.0.0/16"
+  cidr = var.tofugu_datacenter_manifest[var.tofugu_account_name].cidr
 }

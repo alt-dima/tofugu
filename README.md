@@ -1,5 +1,6 @@
 # Inventory manager for OpenTofu or Terraform
-Simple Go application to compare two Kong configurations via Go bindings for Kong's Admin API.
+Manage your infrastructure and environments with Inventory manager and OpenTofu/Terraform!
+Avoid duplication of the TF code! Reuse same code for multive enviroments with configuration in dedicated json files.
 
 **Written for learing Go (it means, the code is very ugly)** and cobra and viper
 
@@ -11,13 +12,21 @@ Application manages inventory and executes opentofu with generated configs
 
 ## Use
 
-`./tofugu -a test -- init`
+```
+./tofugu cook -o test -d account:test -d datacenter:staging1 -t vpc -- init
+./tofugu cook -o test -d account:test -d datacenter:staging1 -t vpc -- plan
+./tofugu cook -o test -d account:test -d datacenter:staging1 -t vpc -- apply
+```
+
+Everything after `--` will be passed as parameters to the `cmd_to_exec`
 
 ## Compatibility
 
-`tofugu` is compatible with any OpenTofu or Terraform version
+`tofugu` is OpenTofu/Terraform version agnostic!
 
 ## $HOME/.tofurc
+
+Recommended to enable plugin_cache_dir to reuse providers
 
 ```
 plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
@@ -35,6 +44,11 @@ defaults:
   inventory_path: examples/inventory
   cmd_to_exec: tofu
 ```
+
+`tofies_path` = relative path to the folder with terraform code (`tofi`)
+`shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `tofi`
+`inventory_path` =  relative path to the folder with jsons
+`cmd_to_exec` = name of the binary to execute with `tofi`
 
 ## License
 

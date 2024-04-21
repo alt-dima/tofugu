@@ -23,9 +23,9 @@ var cookCmd = &cobra.Command{
 		sigs := make(chan os.Signal, 2)
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 
-		for key, value := range viper.GetViper().AllSettings() {
-			log.Printf("key %v val %v", key, value)
-		}
+		//for key, value := range viper.GetViper().AllSettings() {
+		//	log.Printf("key %v val %v", key, value)
+		//}
 
 		cmdToExec := viper.GetString("defaults.cmd_to_exec")
 
@@ -38,7 +38,7 @@ var cookCmd = &cobra.Command{
 
 		manifest := utils.ParseTofiManifest(tofiPath + "/tofi_manifest.json")
 
-		log.Println(manifest.Dimensions)
+		//log.Println(manifest.Dimensions)
 		parsedDimensions := utils.ParseDimensions(manifest.Dimensions, dimensionsArgs)
 
 		var stateS3Path string
@@ -54,6 +54,8 @@ var cookCmd = &cobra.Command{
 		}
 
 		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+viper.GetString("defaults.shared_modules_path"), orgName+stateS3Path+tofiName)
+
+		utils.GenerateVarsByDims(parsedDimensions, cmdWorkTempDir, currentDir+"/"+viper.GetString("defaults.inventory_path")+"/"+orgName)
 
 		log.Println("ToFuGu starting OpenTofu with args: " + strings.Join(cmdArgs, " "))
 		execChildCommand := exec.Command(cmdToExec, cmdArgs...)
