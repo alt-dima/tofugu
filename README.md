@@ -45,10 +45,10 @@ defaults:
   cmd_to_exec: tofu
 ```
 
-`tofies_path` = relative path to the folder with terraform code (`tofi`)
-`shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `tofi`
-`inventory_path` =  relative path to the folder with jsons
-`cmd_to_exec` = name of the binary to execute with `tofi`
+- `tofies_path` = relative path to the folder with terraform code (`tofi`)
+- `shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `tofi`
+- `inventory_path` =  relative path to the folder with jsons
+- `cmd_to_exec` = name of the binary to execute with `tofi`
 
 ## License
 
