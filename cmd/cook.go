@@ -45,12 +45,15 @@ var cookCmd = &cobra.Command{
 		for _, dimension := range manifest.Dimensions {
 			stateS3Path = stateS3Path + parsedDimensions[dimension] + "/"
 		}
+		stateS3Path = stateS3Path + tofiName + ".tfstate"
+		stateS3Region := viper.GetString("defaults.s3_bucket_region")
+		stateS3Name := viper.GetString("defaults.s3_bucket_name")
 
 		cmdArgs := args
 		if args[0] == "init" {
-			cmdArgs = append(cmdArgs, "-backend-config=bucket=asu-tfstates")
-			cmdArgs = append(cmdArgs, "-backend-config=key="+orgName+stateS3Path+tofiName+".tfstate")
-			cmdArgs = append(cmdArgs, "-backend-config=region=us-east-2")
+			cmdArgs = append(cmdArgs, "-backend-config=bucket="+stateS3Name)
+			cmdArgs = append(cmdArgs, "-backend-config=key="+stateS3Path)
+			cmdArgs = append(cmdArgs, "-backend-config=region="+stateS3Region)
 		}
 
 		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+viper.GetString("defaults.shared_modules_path"), orgName+stateS3Path+tofiName)
@@ -86,7 +89,7 @@ var cookCmd = &cobra.Command{
 			exitCodeFinal = execChildCommand.ProcessState.ExitCode()
 		}
 
-		if args[0] == "apply" {
+		if args[0] == "apply" || args[0] == "destroy" {
 			os.RemoveAll(cmdWorkTempDir)
 		}
 

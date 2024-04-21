@@ -43,12 +43,18 @@ defaults:
   shared_modules_path: examples/tofies/shared-modules
   inventory_path: examples/inventory
   cmd_to_exec: tofu
+  s3_bucket_name: asu-tfstates
+  s3_bucket_region: us-east-2
 ```
 
 - `tofies_path` = relative path to the folder with terraform code (`tofi`)
 - `shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `tofi`
 - `inventory_path` =  relative path to the folder with jsons
-- `cmd_to_exec` = name of the binary to execute with `tofi`
+- `cmd_to_exec` = name of the binary to execute (`tofu` or `terraform`)
+- `s3_bucket_name` = name of the S3 bucket to store state
+- `s3_bucket_region` = region of the S3 bucket to store state
+
+S3 key (path) will be generated like `dimName1/dimNameN/tofiName.tfstate`
 
 ## License
 
