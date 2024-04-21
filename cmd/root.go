@@ -41,7 +41,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tofugu.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.tofugu)")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 
 	// Cobra also supports local flags, which will only run
@@ -50,11 +50,11 @@ func init() {
 }
 
 func initConfig() {
-	log.Println("Tofugu version:" + rootCmd.Version)
+	log.Println("TofuGu version:" + rootCmd.Version)
 
 	viper.SetDefault("defaults.inventory_path", "examples/inventory")
 	viper.SetDefault("defaults.shared_modules_path", "examples/tofies/shared-modules")
-	viper.SetDefault("defaults.tofies_path", "examples/tofies2")
+	viper.SetDefault("defaults.tofies_path", "examples/tofies")
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 
 	if cfgFile != "" {
@@ -74,7 +74,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		log.Println("Using config file:", viper.ConfigFileUsed())
+		log.Println("TofuGu using config file:", viper.ConfigFileUsed())
 	} else {
 		log.Println(err.Error())
 	}

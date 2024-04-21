@@ -13,9 +13,9 @@ Application manages inventory and executes opentofu with generated configs
 ## Use
 
 ```
-./tofugu cook -o test -d account:test -d datacenter:staging1 -t vpc -- init
-./tofugu cook -o test -d account:test -d datacenter:staging1 -t vpc -- plan
-./tofugu cook -o test -d account:test -d datacenter:staging1 -t vpc -- apply
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- plan
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
 ```
 
 Everything after `--` will be passed as parameters to the `cmd_to_exec`

@@ -57,10 +57,12 @@ var cookCmd = &cobra.Command{
 		}
 
 		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+viper.GetString("defaults.shared_modules_path"), orgName+stateS3Path+tofiName)
+		log.Println("TofuGu prepared tofi in temp dir: " + cmdWorkTempDir)
 
 		utils.GenerateVarsByDims(parsedDimensions, cmdWorkTempDir, currentDir+"/"+viper.GetString("defaults.inventory_path")+"/"+orgName)
+		log.Println("TofuGu generated tfvars by specified dimensions")
 
-		log.Println("ToFuGu starting OpenTofu with args: " + strings.Join(cmdArgs, " "))
+		log.Println("TofuGu starting cooking: " + cmdToExec + " " + strings.Join(cmdArgs, " "))
 		execChildCommand := exec.Command(cmdToExec, cmdArgs...)
 		execChildCommand.Dir = cmdWorkTempDir
 		execChildCommand.Env = os.Environ()

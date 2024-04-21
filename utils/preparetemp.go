@@ -7,7 +7,7 @@ import (
 )
 
 func PrepareTemp(tofiPath string, sharedModulesPath string, tmpFolderName string) string {
-	cmdTempDir := os.TempDir() + "/tofugu" + GetMD5Hash(tmpFolderName)
+	cmdTempDir := os.TempDir() + "/tofugu-" + GetMD5Hash(tmpFolderName)
 
 	command := exec.Command("rsync", "-a", "--delete", "--exclude=.terraform*", "--exclude=tofi_manifest.json", tofiPath+"/.", cmdTempDir)
 	output, err := command.CombinedOutput()
