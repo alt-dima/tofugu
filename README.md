@@ -1,4 +1,4 @@
-# Inventory manager for OpenToFu
+# Inventory manager for OpenTofu or Terraform
 Simple Go application to compare two Kong configurations via Go bindings for Kong's Admin API.
 
 **Written for learing Go (it means, the code is very ugly)** and cobra and viper
