@@ -85,6 +85,27 @@ Other options contain hard-coded defaults:
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 ```
 
+## Why not Terragrunt?
+
+Not sure, but for me looks like same general idea, but for different cases.
+For example: https://terragrunt.gruntwork.io/docs/features/keep-your-terraform-code-dry/#keep-your-terraform-code-dry
+
+> In a separate repo, called, for example, live, you define the code for all of your environments, which now consists of just one terragrunt.hcl file per component (e.g. app/terragrunt.hcl, mysql/terragrunt.hcl, etc).
+
+And you need to configure/copy terragrunt.hcl (and maybe other files) to each folder/environment (prod,qa, stage) with subfolders like app,mysql,vpc
+But if I have 20 environments (stage1-stage20) and 50 units (app,mysql,vpc,eks,redis,....) then, if I need to add stage21 I will need to copy all of the files again.
+
+I think, better when TF code and inventory split by the repos and adding new environment does not require any changes in the TF repo, only add stage21.json in the inventory repo and deploy every unit
+like
+```
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t vpc -- init
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t vpc -- apply -auto-approve
+
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t eks -- init
+./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t eks -- apply -auto-approve
+```
+P.S. I very respect terragrunt it is prod-grade tool! this "tool" is just go-learning :)
+
 ## License
 
 `tofugu` is licensed with Apache License Version 2.0.
