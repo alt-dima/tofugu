@@ -27,27 +27,28 @@ var cookCmd = &cobra.Command{
 		//	log.Printf("key %v val %v", key, value)
 		//}
 
-		cmdToExec := viper.GetString("defaults.cmd_to_exec")
-
-		currentDir, _ := os.Getwd()
-
 		tofiName, _ := cmd.Flags().GetString("tofi")
 		orgName, _ := cmd.Flags().GetString("org")
 		dimensionsArgs, _ := cmd.Flags().GetStringSlice("dimension")
-		tofiPath := currentDir + "/" + viper.GetString("defaults.tofies_path") + "/" + orgName + "/" + tofiName
 
+		cmdToExec := utils.GetConfigFromViperString("cmd_to_exec", orgName)
+		currentDir, _ := os.Getwd()
+		tofiPath := currentDir + "/" + utils.GetConfigFromViperString("tofies_path", orgName) + "/" + orgName + "/" + tofiName
 		manifest := utils.ParseTofiManifest(tofiPath + "/tofi_manifest.json")
 
 		//log.Println(manifest.Dimensions)
 		parsedDimensions := utils.ParseDimensions(manifest.Dimensions, dimensionsArgs)
 
 		var stateS3Path string
+		if !viper.IsSet(orgName + ".s3_bucket_name") {
+			stateS3Path = stateS3Path + "org_" + orgName + "/"
+		}
 		for _, dimension := range manifest.Dimensions {
 			stateS3Path = stateS3Path + dimension + "_" + parsedDimensions[dimension] + "/"
 		}
 		stateS3Path = stateS3Path + tofiName + ".tfstate"
-		stateS3Region := viper.GetString("defaults.s3_bucket_region")
-		stateS3Name := viper.GetString("defaults.s3_bucket_name")
+		stateS3Region := utils.GetConfigFromViperString("s3_bucket_region", orgName)
+		stateS3Name := utils.GetConfigFromViperString("s3_bucket_name", orgName)
 
 		cmdArgs := args
 		if args[0] == "init" {
@@ -56,10 +57,10 @@ var cookCmd = &cobra.Command{
 			cmdArgs = append(cmdArgs, "-backend-config=region="+stateS3Region)
 		}
 
-		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+viper.GetString("defaults.shared_modules_path"), orgName+stateS3Path+tofiName)
+		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+utils.GetConfigFromViperString("shared_modules_path", orgName), orgName+stateS3Path+tofiName)
 		log.Println("TofuGu prepared tofi in temp dir: " + cmdWorkTempDir)
 
-		utils.GenerateVarsByDims(parsedDimensions, cmdWorkTempDir, currentDir+"/"+viper.GetString("defaults.inventory_path")+"/"+orgName)
+		utils.GenerateVarsByDims(parsedDimensions, cmdWorkTempDir, currentDir+"/"+utils.GetConfigFromViperString("inventory_path", orgName)+"/"+orgName)
 		log.Println("TofuGu generated tfvars by specified dimensions")
 
 		log.Println("TofuGu starting cooking: " + cmdToExec + " " + strings.Join(cmdArgs, " "))
