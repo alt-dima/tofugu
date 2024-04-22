@@ -43,7 +43,7 @@ var cookCmd = &cobra.Command{
 
 		var stateS3Path string
 		for _, dimension := range manifest.Dimensions {
-			stateS3Path = stateS3Path + parsedDimensions[dimension] + "/"
+			stateS3Path = stateS3Path + dimension + "_" + parsedDimensions[dimension] + "/"
 		}
 		stateS3Path = stateS3Path + tofiName + ".tfstate"
 		stateS3Region := viper.GetString("defaults.s3_bucket_region")
