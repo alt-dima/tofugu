@@ -25,5 +25,6 @@ func PrepareTemp(tofiPath string, sharedModulesPath string, tmpFolderName string
 		log.Fatalf("failed to copit tofi to tempdir %s\n", err)
 	}
 
+	log.Println("TofuGu prepared tofi in temp dir: " + cmdTempDir)
 	return cmdTempDir
 }

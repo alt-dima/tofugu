@@ -23,5 +23,6 @@ func ParseTofiManifest(tofiManifestPath string) tofiManifestStruct {
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
+	log.Println("TofuGu loaded tofi manifest: " + tofiManifestPath)
 	return tofiManifest
 }
