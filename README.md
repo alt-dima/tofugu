@@ -2,13 +2,9 @@
 Manage your infrastructure and environments with Inventory manager and OpenTofu/Terraform!
 Avoid duplication of the TF code! Reuse same code for multive enviroments with configuration in dedicated json files.
 
-**Written for learing Go (it means, the code is very ugly)** and cobra and viper
+**Written for learing Go** (and cobra and viper)
 
 Application manages inventory and executes opentofu with generated configs
-
-## Build
-
-`go build -o tofugu`
 
 ## Use
 
