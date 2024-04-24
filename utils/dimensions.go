@@ -6,22 +6,23 @@ import (
 	"strings"
 )
 
-func ParseDimensions(dimensionsManifest []string, dimensionsArgs []string) map[string]string {
-	parsedDimArgs := parseDimArgs(dimensionsArgs)
+func (tofuguStruct *Tofugu) ParseDimensions() {
+	parsedDimArgs := parseDimArgs(tofuguStruct.DimensionsFlags)
 
-	for _, dimension := range dimensionsManifest {
+	for _, dimension := range tofuguStruct.TofiManifest.Dimensions {
 		if _, ok := parsedDimArgs[dimension]; !ok {
 			log.Println("dimension " + dimension + " not passed with -d arg")
 			os.Exit(1)
 		}
 	}
-	return parsedDimArgs
+
+	tofuguStruct.ParsedDimensions = parsedDimArgs
 }
 
 func parseDimArgs(dimensionsArgs []string) map[string]string {
 	parsedDimArgs := make(map[string]string)
 	for _, dimension := range dimensionsArgs {
-		dimensionSlice := strings.Split(dimension, ":")
+		dimensionSlice := strings.SplitN(dimension, ":", 2)
 		parsedDimArgs[dimensionSlice[0]] = dimensionSlice[1]
 	}
 	return parsedDimArgs

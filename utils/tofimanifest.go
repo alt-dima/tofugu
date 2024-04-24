@@ -6,11 +6,8 @@ import (
 	"os"
 )
 
-type tofiManifestStruct struct {
-	Dimensions []string
-}
-
-func ParseTofiManifest(tofiManifestPath string) tofiManifestStruct {
+func (tofuguStruct *Tofugu) ParseTofiManifest(tofiManifestFileName string) {
+	tofiManifestPath := tofuguStruct.TofiPath + "/" + tofiManifestFileName
 	// Let's first read the `config.json` file
 	content, err := os.ReadFile(tofiManifestPath)
 	if err != nil {
@@ -23,6 +20,7 @@ func ParseTofiManifest(tofiManifestPath string) tofiManifestStruct {
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
+
+	tofuguStruct.TofiManifest = tofiManifest
 	log.Println("TofuGu loaded tofi manifest: " + tofiManifestPath)
-	return tofiManifest
 }

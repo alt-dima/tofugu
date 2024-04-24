@@ -14,11 +14,16 @@ Application manages inventory and executes opentofu with generated configs
 ./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
 ```
 
-Everything after `--` will be passed as parameters to the `cmd_to_exec`
+- Everything after `--` will be passed as parameters to the `cmd_to_exec`
+- `-c` = to force remove temo dir after execution (after `apply` or `destroy` and exitcode=0 from tofu/terraform)
+- `-o` = name of the organisation (subfolder in inventory, tofies and tofugu config section)
+- `-d` = dimension to attach to tofu/terraform. You may specifiy as many `-d` pairs as you need!
+- `-t` = name of the tofi in the tofies folder
 
 ## Compatibility
 
 `tofugu` is OpenTofu/Terraform version agnostic!
+Reuired external tools/binaries: `rsync`, `ln`
 
 ## $HOME/.tofurc
 
@@ -47,8 +52,6 @@ When you set dimensions in the tofugu flags `-d datacenter:staging1 `, tofugu wi
 - var.tofugu_datacenter_name = will contain string `staging1`
 - var.tofugu_datacenter_manifest = will contain whole object from `staging1.json`
 
-You may specifiy as many `-d` pairs as you need!
-
 [datacenter.json example in inventory](examples/inventory/demo-org/datacenter/staging1.json)
 
 
@@ -68,7 +71,6 @@ provider "aws" {
     region = var.tofugu_envvar_awsregion
 }
 ```
-
 
 [Env variables used in code example](examples/tofies/demo-org/vpc/providers.tf)
 

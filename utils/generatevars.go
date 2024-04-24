@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-func GenerateVarsByDims(parsedDimensions map[string]string, cmdWorkTempDir string, inventoryPath string) {
-	for dimKey, dimValue := range parsedDimensions {
+func (tofuguStruct *Tofugu) GenerateVarsByDims() {
+	for dimKey, dimValue := range tofuguStruct.ParsedDimensions {
 		var inventroyJsonMap map[string]interface{}
 
-		inventroyJsonPath := inventoryPath + "/" + dimKey + "/" + dimValue + ".json"
+		inventroyJsonPath := tofuguStruct.InventoryPath + "/" + dimKey + "/" + dimValue + ".json"
 
 		inventroyJsonBytes, err := os.ReadFile(inventroyJsonPath)
 		if err != nil {
@@ -24,13 +24,13 @@ func GenerateVarsByDims(parsedDimensions map[string]string, cmdWorkTempDir strin
 			"tofugu_" + dimKey + "_name":     dimValue,
 		}
 
-		writeTfvarsMaps(targetAutoTfvarMap, dimKey, cmdWorkTempDir)
+		writeTfvarsMaps(targetAutoTfvarMap, dimKey, tofuguStruct.CmdWorkTempDir)
 		log.Println("TofuGu generated tfvars for dimension: " + dimKey)
 
 	}
 }
 
-func GenerateVarsByEnvVars(cmdWorkTempDir string) {
+func (tofuguStruct *Tofugu) GenerateVarsByEnvVars() {
 	targetAutoTfvarMap := make(map[string]interface{})
 
 	for _, envVar := range os.Environ() {
@@ -41,7 +41,7 @@ func GenerateVarsByEnvVars(cmdWorkTempDir string) {
 	}
 
 	if len(targetAutoTfvarMap) > 0 {
-		writeTfvarsMaps(targetAutoTfvarMap, "envivars", cmdWorkTempDir)
+		writeTfvarsMaps(targetAutoTfvarMap, "envivars", tofuguStruct.CmdWorkTempDir)
 		log.Println("TofuGu generated tfvars for env variables")
 	}
 }

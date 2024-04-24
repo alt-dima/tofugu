@@ -5,12 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 
 	"github.com/alt-dima/tofugu/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // cookCmd represents the cook command
@@ -20,56 +20,52 @@ var cookCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Long:  `Execute OpenTofu with generated config from inventory and parameters after --`,
 	Run: func(cmd *cobra.Command, args []string) {
+		//Creating signal to be handled and send to the child tofu/terraform
 		sigs := make(chan os.Signal, 2)
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+		var err error
 
-		//for key, value := range viper.GetViper().AllSettings() {
-		//	log.Printf("key %v val %v", key, value)
-		//}
+		// Creating Tofug shared structure and filling with values
+		tofuguStruct := &utils.Tofugu{}
 
-		tofiName, _ := cmd.Flags().GetString("tofi")
-		orgName, _ := cmd.Flags().GetString("org")
-		dimensionsArgs, _ := cmd.Flags().GetStringSlice("dimension")
+		tofuguStruct.TofiName, _ = cmd.Flags().GetString("tofi")
+		tofuguStruct.OrgName, _ = cmd.Flags().GetString("org")
+		tofuguStruct.DimensionsFlags, _ = cmd.Flags().GetStringSlice("dimension")
+		tofuguStruct.TofiPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("tofies_path") + "/" + tofuguStruct.OrgName + "/" + tofuguStruct.TofiName)
+		tofuguStruct.SharedModulesPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path"))
+		tofuguStruct.InventoryPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") + "/" + tofuguStruct.OrgName)
 
-		cmdToExec := utils.GetConfigFromViperString("cmd_to_exec", orgName)
-		currentDir, _ := os.Getwd()
-		tofiPath := currentDir + "/" + utils.GetConfigFromViperString("tofies_path", orgName) + "/" + orgName + "/" + tofiName
-		manifest := utils.ParseTofiManifest(tofiPath + "/tofi_manifest.json")
+		tofuguStruct.ParseTofiManifest("tofi_manifest.json")
+		tofuguStruct.ParseDimensions()
 
-		//log.Println(manifest.Dimensions)
-		parsedDimensions := utils.ParseDimensions(manifest.Dimensions, dimensionsArgs)
+		tofuguStruct.SetupStateS3Path()
 
-		var stateS3Path string
-		if !viper.IsSet(orgName + ".s3_bucket_name") {
-			stateS3Path = stateS3Path + "org_" + orgName + "/"
-		}
-		for _, dimension := range manifest.Dimensions {
-			stateS3Path = stateS3Path + dimension + "_" + parsedDimensions[dimension] + "/"
-		}
-		stateS3Path = stateS3Path + tofiName + ".tfstate"
-		stateS3Region := utils.GetConfigFromViperString("s3_bucket_region", orgName)
-		stateS3Name := utils.GetConfigFromViperString("s3_bucket_name", orgName)
+		tofuguStruct.PrepareTemp()
 
+		tofuguStruct.GenerateVarsByDims()
+		tofuguStruct.GenerateVarsByEnvVars()
+
+		//Local variables for child execution
+		stateS3Region := tofuguStruct.GetStringFromViperByOrgOrDefault("s3_bucket_region")
+		stateS3Name := tofuguStruct.GetStringFromViperByOrgOrDefault("s3_bucket_name")
+		forceCleanTempDir, _ := cmd.Flags().GetBool("clean")
 		cmdArgs := args
 		if args[0] == "init" {
 			cmdArgs = append(cmdArgs, "-backend-config=bucket="+stateS3Name)
-			cmdArgs = append(cmdArgs, "-backend-config=key="+stateS3Path)
+			cmdArgs = append(cmdArgs, "-backend-config=key="+tofuguStruct.StateS3Path)
 			cmdArgs = append(cmdArgs, "-backend-config=region="+stateS3Region)
 		}
+		cmdToExec := tofuguStruct.GetStringFromViperByOrgOrDefault("cmd_to_exec")
 
-		cmdWorkTempDir := utils.PrepareTemp(tofiPath, currentDir+"/"+utils.GetConfigFromViperString("shared_modules_path", orgName), orgName+stateS3Path+tofiName)
-
-		utils.GenerateVarsByDims(parsedDimensions, cmdWorkTempDir, currentDir+"/"+utils.GetConfigFromViperString("inventory_path", orgName)+"/"+orgName)
-		utils.GenerateVarsByEnvVars(cmdWorkTempDir)
-
+		// Starting child and Waiting for it to finish, passing signals to it
 		log.Println("TofuGu starting cooking: " + cmdToExec + " " + strings.Join(cmdArgs, " "))
 		execChildCommand := exec.Command(cmdToExec, cmdArgs...)
-		execChildCommand.Dir = cmdWorkTempDir
+		execChildCommand.Dir = tofuguStruct.CmdWorkTempDir
 		execChildCommand.Env = os.Environ()
 		execChildCommand.Stdin = os.Stdin
 		execChildCommand.Stdout = os.Stdout
 		execChildCommand.Stderr = os.Stderr
-		err := execChildCommand.Start()
+		err = execChildCommand.Start()
 		if err != nil {
 			log.Fatalf("cmd.Start() failed with %s\n", err)
 		}
@@ -84,18 +80,19 @@ var cookCmd = &cobra.Command{
 		exitCodeFinal := 0
 		if err != nil && execChildCommand.ProcessState.ExitCode() < 0 {
 			exitCodeFinal = 1
-			log.Println("OpenTofu failed " + err.Error())
+			log.Println(cmdToExec + " failed " + err.Error())
 		} else if execChildCommand.ProcessState.ExitCode() == 143 {
 			exitCodeFinal = 0
 		} else {
 			exitCodeFinal = execChildCommand.ProcessState.ExitCode()
 		}
 
-		if args[0] == "apply" || args[0] == "destroy" {
-			os.RemoveAll(cmdWorkTempDir)
+		if (exitCodeFinal == 0 && (args[0] == "apply" || args[0] == "destroy")) || forceCleanTempDir {
+			os.RemoveAll(tofuguStruct.CmdWorkTempDir)
+			log.Println("TofuGu removed tofi temp dir: " + tofuguStruct.CmdWorkTempDir)
 		}
 
-		log.Printf("OpenTofu finished with code %v", exitCodeFinal)
+		log.Printf("TofuGu: %v finished with code %v", cmdToExec, exitCodeFinal)
 		os.Exit(exitCodeFinal)
 	},
 }
@@ -116,6 +113,7 @@ func init() {
 	cookCmd.Flags().StringP("tofi", "t", "", "specify tofu unit")
 	//viper.BindPFlag("tofi", cookCmd.Flags().Lookup("tofi"))
 	cookCmd.Flags().StringP("org", "o", "", "specify org")
+	cookCmd.Flags().BoolP("clean", "c", false, "remove tmp after execution")
 	//viper.BindPFlag("org", cookCmd.Flags().Lookup("org"))
 	cookCmd.MarkFlagRequired("tofi")
 	cookCmd.MarkFlagRequired("org")
