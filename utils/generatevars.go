@@ -9,19 +9,11 @@ import (
 
 func (tofuguStruct *Tofugu) GenerateVarsByDims() {
 	for dimKey, dimValue := range tofuguStruct.ParsedDimensions {
-		var inventroyJsonMap map[string]interface{}
-
-		inventroyJsonPath := tofuguStruct.InventoryPath + "/" + dimKey + "/" + dimValue + ".json"
-
-		inventroyJsonBytes, err := os.ReadFile(inventroyJsonPath)
-		if err != nil {
-			log.Fatal("Error when opening file: ", err)
-		}
-		json.Unmarshal(inventroyJsonBytes, &inventroyJsonMap)
+		dimensionJsonMap := tofuguStruct.GetDimData(dimKey, dimValue)
 
 		targetAutoTfvarMap := map[string]interface{}{
-			"tofugu_" + dimKey + "_manifest": inventroyJsonMap,
-			"tofugu_" + dimKey + "_name":     dimValue,
+			"tofugu_" + dimKey + "_data": dimensionJsonMap,
+			"tofugu_" + dimKey + "_name": dimValue,
 		}
 
 		writeTfvarsMaps(targetAutoTfvarMap, dimKey, tofuguStruct.CmdWorkTempDir)
@@ -72,5 +64,8 @@ func writeTfvarsMaps(targetAutoTfvarMap map[string]interface{}, fileName string,
 
 func marshalJsonAndWrite(jsonMap map[string]interface{}, jsonPath string) {
 	targetAutoTfvarMapBytes, _ := json.Marshal(jsonMap)
-	os.WriteFile(jsonPath, targetAutoTfvarMapBytes, os.ModePerm)
+	err := os.WriteFile(jsonPath, targetAutoTfvarMapBytes, os.ModePerm)
+	if err != nil {
+		log.Fatal("error writing file: ", err)
+	}
 }
