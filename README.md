@@ -47,6 +47,10 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 
 ## Inventory (dimensions) store
 
+You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='https://accountid:accountpass@toaster.example.com'`.
+Then TofuGu will connect and receive all the required dimension data from TofuGu-Toaster-ToasterDB.
+Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored.
+
 When you set dimensions in the tofugu flags `-d datacenter:staging1 `, tofugu will provide you inside code next variables:
 
 - var.tofugu_datacenter_name = will contain string `staging1`
