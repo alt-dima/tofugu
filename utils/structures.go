@@ -12,7 +12,6 @@ type Tofugu struct {
 	CmdWorkTempDir    string
 	TofiManifest      tofiManifestStruct
 	StateS3Path       string
-	ToasterUrl        string
 }
 
 type tofiManifestStruct struct {

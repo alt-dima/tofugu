@@ -42,18 +42,20 @@ func (tofuguStruct *Tofugu) GetDimData(dimensionKey string, dimensionValue strin
 	var dimensionJsonBytes []byte
 	var err error
 
-	if tofuguStruct.ToasterUrl == "" {
+	if os.Getenv("toasterurl") == "" {
 		inventroyJsonPath := tofuguStruct.InventoryPath + "/" + dimensionKey + "/" + dimensionValue + ".json"
 		dimensionJsonBytes, err = os.ReadFile(inventroyJsonPath)
 		if err != nil {
 			log.Fatal("Error when opening file: ", err)
 		}
 	} else {
-		resp, err := http.Get(tofuguStruct.ToasterUrl + "/dimension/" + tofuguStruct.OrgName + "/" + dimensionKey + ":" + dimensionValue)
-
+		resp, err := http.Get(os.Getenv("toasterurl") + "/api/dimension/" + dimensionKey + "/" + dimensionValue + "?orgname=" + tofuguStruct.OrgName + "&workspace=master")
 		if err != nil {
 			log.Fatalf("request to Toaster Failed: %s", err)
+		} else if resp.StatusCode != 200 {
+			log.Fatalf("request to Toaster Failed with response: %v", resp.StatusCode)
 		}
+
 		defer resp.Body.Close()
 		dimensionJsonBytes, err = io.ReadAll(resp.Body)
 		if err != nil {
