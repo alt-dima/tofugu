@@ -30,6 +30,8 @@ var cookCmd = &cobra.Command{
 
 		tofuguStruct.TofiName, _ = cmd.Flags().GetString("tofi")
 		tofuguStruct.OrgName, _ = cmd.Flags().GetString("org")
+		tofuguStruct.Workspace, _ = cmd.Flags().GetString("workspace")
+		tofuguStruct.ToasterUrl = os.Getenv("toasterurl")
 		tofuguStruct.DimensionsFlags, _ = cmd.Flags().GetStringSlice("dimension")
 		tofuguStruct.TofiPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("tofies_path") + "/" + tofuguStruct.OrgName + "/" + tofuguStruct.TofiName)
 		tofuguStruct.SharedModulesPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path"))
@@ -43,6 +45,7 @@ var cookCmd = &cobra.Command{
 		tofuguStruct.PrepareTemp()
 
 		tofuguStruct.GenerateVarsByDims()
+		tofuguStruct.GenerateVarsByDimOptional("defaults")
 		tofuguStruct.GenerateVarsByEnvVars()
 
 		//Local variables for child execution
@@ -113,6 +116,7 @@ func init() {
 	cookCmd.Flags().StringP("tofi", "t", "", "specify tofu unit")
 	//viper.BindPFlag("tofi", cookCmd.Flags().Lookup("tofi"))
 	cookCmd.Flags().StringP("org", "o", "", "specify org")
+	cookCmd.Flags().StringP("workspace", "w", "master", "specify workspace for toaster")
 	cookCmd.Flags().BoolP("clean", "c", false, "remove tmp after execution")
 	//viper.BindPFlag("org", cookCmd.Flags().Lookup("org"))
 	cookCmd.MarkFlagRequired("tofi")

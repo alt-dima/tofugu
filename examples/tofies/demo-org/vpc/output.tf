@@ -3,5 +3,5 @@ output "region_from_env" {
 }
 
 output "region_from_inv" {
-    value = var.tofugu_account_manifest.region
+    value = var.tofugu_account_data.region
 }

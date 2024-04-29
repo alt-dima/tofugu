@@ -12,8 +12,21 @@ type Tofugu struct {
 	CmdWorkTempDir    string
 	TofiManifest      tofiManifestStruct
 	StateS3Path       string
+	ToasterUrl        string
+	Workspace         string
 }
 
 type tofiManifestStruct struct {
 	Dimensions []string
+}
+
+type ToasterResponse struct {
+	Error      string
+	Dimensions []DimensionInToaster
+}
+
+type DimensionInToaster struct {
+	ID        string
+	WorkSpace string
+	DimData   map[string]interface{}
 }
