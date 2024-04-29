@@ -1,0 +1,5 @@
+{
+    "test-account": {
+        "enable_dns_support": true
+    }
+}

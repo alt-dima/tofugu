@@ -9,7 +9,7 @@ import (
 
 func (tofuguStruct *Tofugu) GenerateVarsByDims() {
 	for dimKey, dimValue := range tofuguStruct.ParsedDimensions {
-		dimensionJsonMap := tofuguStruct.GetDimData(dimKey, dimValue)
+		dimensionJsonMap := tofuguStruct.GetDimData(dimKey, dimValue, false)
 
 		targetAutoTfvarMap := map[string]interface{}{
 			"tofugu_" + dimKey + "_data": dimensionJsonMap,
@@ -17,8 +17,22 @@ func (tofuguStruct *Tofugu) GenerateVarsByDims() {
 		}
 
 		writeTfvarsMaps(targetAutoTfvarMap, dimKey, tofuguStruct.CmdWorkTempDir)
-		log.Println("TofuGu generated tfvars for dimension: " + dimKey)
+		log.Println("TofuGu attached dimension in var.tofugu_" + dimKey + "_data and var.tofugu_" + dimKey + "_name")
 
+	}
+}
+
+func (tofuguStruct *Tofugu) GenerateVarsByDimOptional(optionType string) {
+	for dimKey := range tofuguStruct.ParsedDimensions {
+		dimensionJsonMap := tofuguStruct.GetDimData(dimKey, "dim_"+optionType, true)
+		if len(dimensionJsonMap) > 0 {
+			targetAutoTfvarMap := map[string]interface{}{
+				"tofugu_" + dimKey + "_" + optionType: dimensionJsonMap,
+			}
+
+			writeTfvarsMaps(targetAutoTfvarMap, dimKey+"_"+optionType, tofuguStruct.CmdWorkTempDir)
+			log.Println("TofuGu attached " + optionType + " in var.tofugu_" + dimKey + "_" + optionType)
+		}
 	}
 }
 
@@ -29,12 +43,12 @@ func (tofuguStruct *Tofugu) GenerateVarsByEnvVars() {
 		if strings.HasPrefix(envVar, "tofugu_envvar_") {
 			envVarList := strings.SplitN(envVar, "=", 2)
 			targetAutoTfvarMap[envVarList[0]] = envVarList[1]
+			log.Println("TofuGu attached env variable in var." + envVarList[0])
 		}
 	}
 
 	if len(targetAutoTfvarMap) > 0 {
 		writeTfvarsMaps(targetAutoTfvarMap, "envivars", tofuguStruct.CmdWorkTempDir)
-		log.Println("TofuGu generated tfvars for env variables")
 	}
 }
 
@@ -63,9 +77,12 @@ func writeTfvarsMaps(targetAutoTfvarMap map[string]interface{}, fileName string,
 }
 
 func marshalJsonAndWrite(jsonMap map[string]interface{}, jsonPath string) {
-	targetAutoTfvarMapBytes, _ := json.Marshal(jsonMap)
-	err := os.WriteFile(jsonPath, targetAutoTfvarMapBytes, os.ModePerm)
+	targetAutoTfvarMapBytes, err := json.Marshal(jsonMap)
 	if err != nil {
-		log.Fatal("error writing file: ", err)
+		log.Fatal("tofugu failed to marshal json: ", err)
+	}
+	err = os.WriteFile(jsonPath, targetAutoTfvarMapBytes, os.ModePerm)
+	if err != nil {
+		log.Fatal("tofugu error writing file: ", err)
 	}
 }

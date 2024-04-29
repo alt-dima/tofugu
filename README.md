@@ -49,17 +49,18 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 
 You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='https://accountid:accountpass@toaster.example.com'`.
 Then TofuGu will connect and receive all the required dimension data from TofuGu-Toaster-ToasterDB.
-Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored.
+Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster will not find dimension with specified `workspacename` it will try to return dimension from `master` workspace/branch!
 
 When you set dimensions in the tofugu flags `-d datacenter:staging1 `, tofugu will provide you inside code next variables:
 
 - var.tofugu_datacenter_name = will contain string `staging1`
 - var.tofugu_datacenter_manifest = will contain whole object from `staging1.json`
+- var.tofugu_datacenter_defaults = will contain whole object from `dim_defaults.json` IF file `dim_defaults.json` exists!
 
-[datacenter.json example in inventory](examples/inventory/demo-org/datacenter/staging1.json)
+[staging1.json example in inventory](examples/inventory/demo-org/datacenter/staging1.json)
+[dim_defaults.json example in inventory](examples/inventory/demo-org/datacenter/dim_defaults.json)
 
-
-[datacenter object from json used in code example](examples/tofies/demo-org/vpc/main.tf)
+[datacenter object with defaults used in tf example](examples/tofies/demo-org/vpc/main.tf#L5)
 
 ## Passing environment variables from shell
 
