@@ -4,9 +4,11 @@ Avoid duplication of the TF code! Reuse same code for multive enviroments with c
 
 **Written for learing Go** (and cobra and viper)
 
-Application manages inventory and executes opentofu with generated configs
+Application manages inventory and executes opentofu with terraform variables.
 
-## Use
+No need to manually create any `tfvars` or `variables` files/directives!
+
+## Usage
 
 ```
 ./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
@@ -20,38 +22,41 @@ Application manages inventory and executes opentofu with generated configs
 - `-d` = dimension to attach to tofu/terraform. You may specifiy as many `-d` pairs as you need!
 - `-t` = name of the tofi in the tofies folder
 
-## Compatibility
-
-`tofugu` is OpenTofu/Terraform version agnostic!
-Reuired external tools/binaries: `rsync`, `ln`
-
-## $HOME/.tofurc
-
-Recommended to enable plugin_cache_dir to reuse providers.
-
-[.tofurc example](examples/.tofurc):
-
-```
-plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
-plugin_cache_may_break_dependency_lock_file = true
-```
-Do not forget to create plugin-cache dir: `mkdir "$HOME/.terraform.d/plugin-cache"`
 
 ## Tofi Manifest
 
 Special json file with name `tofi_manifest.json` in `tofi` folder provides options for TofuGu.
 
-Currently only `dimensions` with list of the required/expecting dimensions (from `inventory`)
+Currently only `dimensions` with list of the required/expecting dimensions (from **Inventory Store**)
 
 [tofi_manifest.json example](examples/tofies/demo-org/vpc/tofi_manifest.json)
 
-## Inventory (dimensions) store
+## Inventory (dimensions) Store
 
+### Toaster-ToasterDB
 You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='https://accountid:accountpass@toaster.example.com'`.
 Then TofuGu will connect and receive all the required dimension data from TofuGu-Toaster-ToasterDB.
 Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster will not find dimension with specified `workspacename` it will try to return dimension from `master` workspace/branch!
 
-When you set dimensions in the tofugu flags `-d datacenter:staging1 `, tofugu will provide you inside code next variables:
+**Toaster-ToasterDB** Provides additional features for your CI and CD pipelines. For example, you need to receive a [first-app.json](examples/inventory/demo-org/application/first-app.json) in the CI pipeline, to check application configuration.
+Or you need a list of all the datacenters in [datacenter dimension](examples/datacenter) in Jenkins drop-down list to select to which datacenter to deploy application.
+
+Please join the [Toaster-ToasterDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
+
+To upload/update dimensions in Toaster from your Inventory Files repo you could use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh  examples/inventory/`
+
+### Inventory Files repo
+
+If env variable `toasterurl` is not set, TofuGu will use file-based inventory storage, by the path configured in `inventory_path`
+
+Examples:
+
+- [staging1.json in Inventory Files](examples/inventory/demo-org/datacenter/staging1.json)
+- [dim_defaults.json in Inventory Files](examples/inventory/demo-org/datacenter/dim_defaults.json)
+
+### Dimensions usage in tf-code
+
+When you set dimensions in the tofugu flags `-d datacenter:staging1 `, TofuGu will provide you inside tf-code next variables:
 
 - var.tofugu_datacenter_name = will contain string `staging1`
 - var.tofugu_datacenter_manifest = will contain whole object from `staging1.json`
@@ -59,8 +64,6 @@ When you set dimensions in the tofugu flags `-d datacenter:staging1 `, tofugu wi
 
 Examples:
 
-- [staging1.json in Inventory Files](examples/inventory/demo-org/datacenter/staging1.json)
-- [dim_defaults.json in Inventory Files](examples/inventory/demo-org/datacenter/dim_defaults.json)
 - [datacenter object with defaults used in tf-code](examples/tofies/demo-org/vpc/main.tf#L5)
 
 ## Passing environment variables from shell
@@ -124,7 +127,7 @@ Other options contain hard-coded defaults:
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 ```
 
-# Remote state in S3
+## Remote state in S3
 
 [Your terraform code (`tofi`) should contains at least:](examples/tofies/demo-org/vpc/versions.tf#L4):
 ```
@@ -138,6 +141,24 @@ If for the `demo-org` config `s3_bucket_name` is set, then S3 key (path) will be
 If for the `demo-org` config `s3_bucket_name` is NOT set, then S3 key (path) will be generated like `s3://default-tfstates/org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
 
 This could be useful, if you want to store by default tfstate for all the organisations in the same/default bucket `default-tfstates` but for some specific organisation you need to store tfstates in dedicated bucket `demo-org-tfstates`
+
+
+## $HOME/.tofurc
+
+Recommended to enable plugin_cache_dir to reuse providers.
+
+[.tofurc example](examples/.tofurc):
+
+```
+plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
+plugin_cache_may_break_dependency_lock_file = true
+```
+Do not forget to create plugin-cache dir: `mkdir "$HOME/.terraform.d/plugin-cache"`
+
+## Compatibility
+
+`tofugu` is OpenTofu/Terraform version agnostic!
+Required external tools/binaries: `rsync`, `ln`
 
 ## Why not Terragrunt?
 
