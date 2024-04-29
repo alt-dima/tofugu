@@ -17,11 +17,10 @@ No need to manually create any `tfvars` or `variables` files/directives!
 ```
 
 - Everything after `--` will be passed as parameters to the `cmd_to_exec`
-- `-c` = to force remove temo dir after execution (after `apply` or `destroy` and exitcode=0 from tofu/terraform)
-- `-o` = name of the organisation (subfolder in inventory, tofies and tofugu config section)
-- `-d` = dimension to attach to tofu/terraform. You may specifiy as many `-d` pairs as you need!
-- `-t` = name of the tofi in the tofies folder
-
+- `-c` = to remove temp dir after any `tofugu` execution (after `apply` or `destroy` and exitcode=0 temp dir removed automatically)
+- `-o` = name of the `organization` (subfolder in **Inventory**, **tofies** folders and in `.tofugu` config section)
+- `-d` = `dimension` to attach to tofu/terraform. You may specify as many `-d` pairs as you need!
+- `-t` = name of the `tofi` in the `tofies` folder
 
 ## Tofi Manifest
 
