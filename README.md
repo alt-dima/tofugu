@@ -6,7 +6,7 @@ Avoid duplication of the TF code! Reuse same code for multive enviroments with c
 
 Application manages inventory and executes opentofu with terraform variables.
 
-No need to manually create any `tfvars` or `variables` files/directives!
+No need to manually create any `tfvars` or `variables` files/directives -> [empty variables.tf](examples/tofies/demo-org/vpc/variables.tf)
 
 ## Usage
 
