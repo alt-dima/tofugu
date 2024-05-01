@@ -10,10 +10,18 @@ No need to manually create any `tfvars` or `variables` files/directives -> [empt
 
 ## Usage
 
+Org with AWS resources and state stored in S3
 ```
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- plan
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
+./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
+./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- plan
+./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
+```
+
+Org with Google Cloud resources and state stored in Google Cloud Storage
+```
+./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- init
+./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- plan
+./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- apply
 ```
 
 - Everything after `--` will be passed as parameters to the `cmd_to_exec`
@@ -33,7 +41,7 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 ## Inventory (dimensions) Store
 
 ### Cloud Native Inventory Storage (Toaster-ToasterDB)
-You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='https://accountid:accountpass@toaster.example.com'`.
+You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='http://accountid:accountpass@toaster.altuhov.su'`.
 Then TofuGu will connect and receive all the required dimension data from TofuGu-Toaster-ToasterDB.
 Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster will not find dimension with specified `workspacename` it will try to return dimension from `master` workspace/branch!
 
@@ -84,7 +92,7 @@ provider "aws" {
 
 ## $HOME/.tofugu
 
-Config file path maybe provided by the `--config` flag, for example: `
+Config file (in YAML format) path maybe provided by the `--config` flag, for example: `
 ```
 ./tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ```
@@ -97,26 +105,31 @@ defaults:
   shared_modules_path: examples/tofies/shared-modules
   inventory_path: examples/inventory
   cmd_to_exec: tofu
-  s3_bucket_name: default-tfstates
-  s3_bucket_region: us-east-2
-demo-org:
-  s3_bucket_name: demo-org-tfstates
+  backend:
+    bucket: default-tfstates
+    key: $tofugu_state_path
+    region: us-east-2
+gcp-org:
+  backend:
+    bucket: gcp-tfstates
+    prefix: $tofugu_state_path
 ```
 
 - `tofies_path` = relative path to the folder with terraform code (`tofi`)
 - `shared_modules_path` = relative path to the folder with shared TF modules maybe used by any `tofi`
 - `inventory_path` =  relative path to the folder with jsons
 - `cmd_to_exec` = name of the binary to execute (`tofu` or `terraform`)
-- `s3_bucket_name` = name of the S3 bucket to store state
-- `s3_bucket_region` = region of the S3 bucket to store state
+- `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$tofugu_state_path` will be replaced by generated path.
+For example, it will look like `tofu init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
 
 At least 
 ```
 defaults:
-  s3_bucket_name: default-tfstates
-  s3_bucket_region: us-east-2
+  backend:
+    bucket: default-tfstates
+    key: $tofugu_state_path
 ```
-must be set in the config file!
+must be set in the config file! With key:values specific for the backend provider being used in org!
 
 Other options contain hard-coded defaults:
 ```
@@ -128,16 +141,25 @@ Other options contain hard-coded defaults:
 
 ## Remote state in S3
 
-[Your terraform code (`tofi`) should contains at least:](examples/tofies/demo-org/vpc/versions.tf#L4):
+AWS, Google Cloud and some other backends are supported! You could configure any backend provider in `tofugu config file`
+
+[For AWS S3 your terraform code (`tofi`) should contains at least:](examples/tofies/demo-org/vpc/versions.tf#L4):
 ```
 terraform {
   backend "s3" {}
 }
 ```
 
-If for the `demo-org` config `s3_bucket_name` is set, then S3 key (path) will be generated like: `s3://demo-org-tfstates/dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
+[For Google Cloud Storage your terraform code (`tofi`) should contains at least:](examples/tofies/gcp-org/free_instance/versions.tf#L4):
+```
+terraform {
+  backend "gcs" {}
+}
+```
 
-If for the `demo-org` config `s3_bucket_name` is NOT set, then S3 key (path) will be generated like `s3://default-tfstates/org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
+If for the `demo-org` config `bucket` is set, then `$tofugu_state_path` will be like: `dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
+
+If for the `demo-org` config `bucket` is NOT set, then `$tofugu_state_path` will be like `org_demo-org/dimName1_dimValue1/dimNameN_dimValueN/tofiName.tfstate`
 
 This could be useful, if you want to store by default tfstate for all the organisations in the same/default bucket `default-tfstates` but for some specific organisation you need to store tfstates in dedicated bucket `demo-org-tfstates`
 
