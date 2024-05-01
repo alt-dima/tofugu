@@ -41,7 +41,7 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 ## Inventory (dimensions) Store
 
 ### Cloud Native Inventory Storage (Toaster-ToasterDB)
-You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='http://accountid:accountpass@toaster.altuhov.su'`.
+You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='https://accountid:accountpass@toaster.altuhov.su'`.
 Then TofuGu will connect and receive all the required dimension data from TofuGu-Toaster-ToasterDB.
 Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster will not find dimension with specified `workspacename` it will try to return dimension from `master` workspace/branch!
 
