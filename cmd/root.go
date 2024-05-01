@@ -57,6 +57,7 @@ func initConfig() {
 	viper.SetDefault("defaults.tofies_path", "examples/tofies")
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 
+	viper.SetConfigType("yaml")
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -67,7 +68,6 @@ func initConfig() {
 
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
 		viper.SetConfigName(".tofugu")
 	}
 

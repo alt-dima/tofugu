@@ -40,7 +40,7 @@ var cookCmd = &cobra.Command{
 		tofuguStruct.ParseTofiManifest("tofi_manifest.json")
 		tofuguStruct.ParseDimensions()
 
-		tofuguStruct.SetupStateS3Path()
+		backendConfig := tofuguStruct.SetupBackendConfig()
 
 		tofuguStruct.PrepareTemp()
 
@@ -49,14 +49,10 @@ var cookCmd = &cobra.Command{
 		tofuguStruct.GenerateVarsByEnvVars()
 
 		//Local variables for child execution
-		stateS3Region := tofuguStruct.GetStringFromViperByOrgOrDefault("s3_bucket_region")
-		stateS3Name := tofuguStruct.GetStringFromViperByOrgOrDefault("s3_bucket_name")
 		forceCleanTempDir, _ := cmd.Flags().GetBool("clean")
 		cmdArgs := args
 		if args[0] == "init" {
-			cmdArgs = append(cmdArgs, "-backend-config=bucket="+stateS3Name)
-			cmdArgs = append(cmdArgs, "-backend-config=key="+tofuguStruct.StateS3Path)
-			cmdArgs = append(cmdArgs, "-backend-config=region="+stateS3Region)
+			cmdArgs = append(cmdArgs, backendConfig...)
 		}
 		cmdToExec := tofuguStruct.GetStringFromViperByOrgOrDefault("cmd_to_exec")
 

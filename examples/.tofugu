@@ -3,5 +3,11 @@ defaults:
   shared_modules_path: examples/tofies/shared-modules
   inventory_path: examples/inventory
   cmd_to_exec: tofu
-  s3_bucket_name: default-tfstates
-  s3_bucket_region: us-east-2
+  backend:
+    bucket: default-tfstates
+    key: $tofugu_state_path
+    region: us-east-2
+gcp-org:
+  backend:
+    bucket: gcp-tfstates
+    prefix: $tofugu_state_path

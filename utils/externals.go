@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -26,15 +27,37 @@ func (tofuguStruct *Tofugu) GetStringFromViperByOrgOrDefault(keyName string) str
 	}
 }
 
-func (tofuguStruct *Tofugu) SetupStateS3Path() {
+func (tofuguStruct *Tofugu) GetObjectFromViperByOrgOrDefault(keyName string) map[string]any {
+	if viper.IsSet(tofuguStruct.OrgName + "." + keyName) {
+		return viper.GetStringMap(tofuguStruct.OrgName + "." + keyName)
+	} else {
+		return viper.GetStringMap("defaults." + keyName)
+	}
+}
+
+func (tofuguStruct *Tofugu) SetupBackendConfig() []string {
+	var backendFinalConfig []string
+
 	var stateS3Path string
-	if !viper.IsSet(tofuguStruct.OrgName + ".s3_bucket_name") {
+	if !viper.IsSet(tofuguStruct.OrgName + ".backend") {
 		stateS3Path = stateS3Path + "org_" + tofuguStruct.OrgName + "/"
 	}
+
 	for _, dimension := range tofuguStruct.TofiManifest.Dimensions {
 		stateS3Path = stateS3Path + dimension + "_" + tofuguStruct.ParsedDimensions[dimension] + "/"
 	}
 	tofuguStruct.StateS3Path = stateS3Path + tofuguStruct.TofiName + ".tfstate"
+
+	backendTofuguConfig := tofuguStruct.GetObjectFromViperByOrgOrDefault("backend")
+	if len(backendTofuguConfig) == 0 {
+		log.Println("Tofugu: no backend config provied!")
+	}
+	for param, value := range backendTofuguConfig {
+		replacedVar := strings.Replace(value.(string), "$tofugu_state_path", tofuguStruct.StateS3Path, 1)
+		backendFinalConfig = append(backendFinalConfig, "-backend-config="+param+"="+replacedVar)
+	}
+
+	return backendFinalConfig
 }
 
 func (tofuguStruct *Tofugu) GetDimData(dimensionKey string, dimensionValue string, skipOnNotFound bool) map[string]interface{} {
