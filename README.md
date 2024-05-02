@@ -46,7 +46,7 @@ Then TofuGu will connect and receive all the required dimension data from TofuGu
 Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster will not find dimension with specified `workspacename` it will try to return dimension from `master` workspace/branch!
 
 **Toaster-ToasterDB** Provides additional features for your CI and CD pipelines. For example, you need to receive a [first-app.json](examples/inventory/demo-org/application/first-app.json) in the CI pipeline, to check application configuration.
-Or you need a list of all the datacenters in [datacenter dimension](examples/datacenter) in Jenkins drop-down list to select to which datacenter to deploy application.
+Or you need a list of all the datacenters in [datacenter dimension](examples/inventory/demo-org/datacenter) in [Jenkins drop-down](https://github.com/alt-dima/tofugu/issues/10#issuecomment-2090932416) list to select to which datacenter to deploy application.
 
 Please join the [Toaster-ToasterDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
 
