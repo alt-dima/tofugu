@@ -11,14 +11,14 @@ No need to manually create any `tfvars` or `variables` files/directives -> [empt
 ## Usage
 
 Org with AWS resources and state stored in S3
-```
+```bash
 ./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- plan
 ./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
 ```
 
 Org with Google Cloud resources and state stored in Google Cloud Storage
-```
+```bash
 ./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- init
 ./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- plan
 ./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- apply
@@ -41,16 +41,28 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 ## Inventory (dimensions) Store
 
 ### Cloud Native Inventory Storage (Toaster-ToasterDB)
-You could set env variable `toasterurl` to point to TofuGu-Toaster, like `export toasterurl='https://accountid:accountpass@toaster.altuhov.su'`.
-Then TofuGu will connect and receive all the required dimension data from TofuGu-Toaster-ToasterDB.
+You could set env variable `toasterurl` to point to TofuGu-Toaster, like:
+```bash
+export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
+```
+
+To generate your own credentials please go to [https://toaster.altuhov.su/](https://toaster.altuhov.su/) , fill the form with Account Name, Email and press `Create User` and you will receive generated credentials and ready-to-use export command like:
+```
+Please execute in shell to set toasterurl:
+
+export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@toaster.altuhov.su
+```
+
+With correct `toasterurl` TofuGu will connect and receive all the required dimension data from the Toaster-ToasterDB.
 Additional parameter could be passed to tofugu `-w workspacename`. In general `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster will not find dimension with specified `workspacename` it will try to return dimension from `master` workspace/branch!
 
 **Toaster-ToasterDB** Provides additional features for your CI and CD pipelines. For example, you need to receive a [first-app.json](examples/inventory/demo-org/application/first-app.json) in the CI pipeline, to check application configuration.
 Or you need a list of all the datacenters in [datacenter dimension](examples/inventory/demo-org/datacenter) in [Jenkins drop-down](https://github.com/alt-dima/tofugu/issues/10#issuecomment-2090932416) list to select to which datacenter to deploy application.
 
+To upload/update dimensions in Toaster from your Inventory Files repo you could use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh  examples/inventory/`
+
 Please join the [Toaster-ToasterDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
 
-To upload/update dimensions in Toaster from your Inventory Files repo you could use [inventory-to-toaster.sh script example](examples/inventory-to-toaster.sh) and execute it like `bash examples/inventory-to-toaster.sh  examples/inventory/`
 
 ### Inventory Files repo
 
@@ -78,7 +90,7 @@ Examples:
 For example, you need to pass a variable (AWS region) from shell to the terraform code, simply set it and use!
 
 **Environment variable must start with `tofugu_envvar_` prefix!**
-```
+```bash
 export tofugu_envvar_awsregion=us-east-1
 ```
 In the TF code:
@@ -93,13 +105,13 @@ provider "aws" {
 ## $HOME/.tofugu
 
 Config file (in YAML format) path maybe provided by the `--config` flag, for example: `
-```
+```bash
 ./tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ```
 If `--config` flag is not set, then it will try to load from default location `$HOME/.tofugu`
 
 [.tofugu example](examples/.tofugu):
-```
+```yaml
 defaults:
   tofies_path: examples/tofies
   shared_modules_path: examples/tofies/shared-modules
@@ -123,7 +135,7 @@ gcp-org:
 For example, it will look like `tofu init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
 
 At least 
-```
+```yaml
 defaults:
   backend:
     bucket: default-tfstates
@@ -132,7 +144,7 @@ defaults:
 must be set in the config file! With key:values specific for the backend provider being used in org!
 
 Other options contain hard-coded defaults:
-```
+```go
 	viper.SetDefault("defaults.inventory_path", "examples/inventory")
 	viper.SetDefault("defaults.shared_modules_path", "examples/tofies/shared-modules")
 	viper.SetDefault("defaults.tofies_path", "examples/tofies")
@@ -193,7 +205,7 @@ But if I have 20 environments (stage1-stage20) and 50 units (app,mysql,vpc,eks,r
 
 Maybe better when TF code and inventory split by the repos and adding new environment does not require any changes in the TF repo, only add stage21.json in the inventory repo and deploy every unit
 like
-```
+```bash
 ./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t vpc -- init
 ./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t vpc -- apply -auto-approve
 
