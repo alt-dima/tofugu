@@ -1,13 +1,13 @@
 # Infrastructure layers configuration orchestrator for OpenTofu or Terraform
 Manage your infrastructure across multiple environments (development, staging, and production) and multiple layers (like multiple servers, networks, storage, databases) efficiently!
+
 Avoid duplicating Terraform code (directory for each environment) by reusing it across multiple environments with dedicated JSON configuration files.
 
 - Environment/layer configuration stored outside the Terrafom/OpenTofu code
 - Terrafom/OpenTofu code, called **tofi**, should be generic enough to handle provided configuration to deploy same resources with different configurations
-- `tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code = resulting in full set of the Terraform code and configuration variables
+- `tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code (**tofi**) = resulting in full set of the Terraform code and configuration variables
 - After temporary folder is ready it executes `terraform` or `tofu` with specified parameters
 - Maintainins separate state files for each environment/layer = automaticaly/dynamic provides configuration for remote state managment (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration+terraform) stored in different `tfstate` files in remote storage (S3, GCS)
-- No need to manually create any `tfvars` or `variables` files/directives -> [empty variables.tf](examples/tofies/demo-org/vpc/variables.tf)
 
 ## Usage
 
@@ -153,6 +153,23 @@ Other options contain hard-coded defaults:
 	viper.SetDefault("defaults.tofies_path", "examples/tofies")
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 ```
+
+## Shared modules support
+
+It is a good practice to move some generic terraform code to the `modules` and reuse those modules in multiple terraform code (**tofies**)
+
+Path to the folder with such private shared modules configured by `shared_modules_path` parameter in `.tofugu` configuration file.
+
+This folder will be mounted/linked to the every temporary folder (set) so you could use any module by short path like
+```
+//use shared-module
+module "vpc" {
+  source = "./shared-modules/create_vpc"
+}
+```
+Examples:
+- [Shared module for VPC creation](examples/tofies/shared-modules/create_vpc)
+- [Shared module for VPC creation used in code](examples/tofies/demo-org/vpc/main.tf#L3)
 
 ## Remote state in S3
 
