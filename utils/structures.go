@@ -30,3 +30,11 @@ type DimensionInToaster struct {
 	WorkSpace string
 	DimData   map[string]interface{}
 }
+
+type HistoryStruct struct {
+	CmdToExec  string
+	CmdArgs    []string
+	CmdMainArg string
+	ExitCode   int
+	Dimensions map[string]string
+}

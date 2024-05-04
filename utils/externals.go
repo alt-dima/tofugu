@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -117,4 +118,33 @@ func (tofuguStruct *Tofugu) GetDimData(dimensionKey string, dimensionValue strin
 	}
 
 	return dimensionJsonMap
+}
+
+func (tofuguStruct *Tofugu) SendHistoryData(cmdToExec string, cmdArgs []string, exitCodeFinal int) {
+	if tofuguStruct.ToasterUrl != "" {
+
+		var historyData HistoryStruct
+		historyData.CmdToExec = cmdToExec
+		historyData.CmdMainArg = cmdArgs[0]
+		if len(cmdArgs) > 1 {
+			historyData.CmdArgs = cmdArgs[1:]
+		}
+		historyData.ExitCode = exitCodeFinal
+		historyData.Dimensions = tofuguStruct.ParsedDimensions
+
+		byteStream := new(bytes.Buffer)
+		err := json.NewEncoder(byteStream).Encode(historyData)
+		if err != nil {
+			log.Printf("tofugu: failed to prepare json data: %s", err)
+		}
+
+		resp, err := http.Post(tofuguStruct.ToasterUrl+"/api/history/"+tofuguStruct.OrgName+"/"+tofuguStruct.Workspace+"/"+tofuguStruct.TofiName, "application/json; charset=UTF-8", byteStream)
+		if err != nil {
+			log.Printf("tofugu toaster: history post request failed: %s", err)
+		} else if resp.StatusCode != 200 {
+			resp.Body.Close()
+			log.Printf("tofugu toaster: history post request failed with response: %v", resp.StatusCode)
+		}
+		defer resp.Body.Close()
+	}
 }
