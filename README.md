@@ -9,16 +9,29 @@ Avoid duplicating Terraform code (directory for each environment) by reusing it 
 - After temporary folder is ready it executes `terraform` or `tofu` with specified parameters
 - Maintainins separate state files for each environment/layer = automaticaly/dynamic provides configuration for remote state managment (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration+terraform) stored in different `tfstate` files in remote storage (S3, GCS)
 
+## What about alternative tools?
+
+Yes, you should check other Infrastructure as Code (IaC) orchestration tool for Terraform:
+- [Atmos](https://github.com/cloudposse/atmos)
+- [Digger](https://github.com/diggerhq/digger)
+- [Terragrunt](https://github.com/gruntwork-io/terragrunt)
+- [Terramate](https://github.com/terramate-io/terramate)
+
+So why another tool?
+1. The more open source tools the better (for GitHub Copilot, not for Earth).
+2. The more choice, the better (there are countries where people have no choice).
+3. Imagine there is only AWS CloudFormation.
+
 ## Usage
 
-Org with AWS resources and state stored in S3
+Organization with AWS resources and state stored in S3
 ```bash
 ./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- plan
 ./tofugu cook --config examples/.tofugu -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- apply
 ```
 
-Org with Google Cloud resources and state stored in Google Cloud Storage
+Organization with Google Cloud resources and state stored in Google Cloud Storage
 ```bash
 ./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- init
 ./tofugu cook --config examples/.tofugu -o gcp-org -d account:free-tier -t free_instance -- plan
@@ -41,7 +54,7 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 
 ## Infrastructure layers/dimensions configurations Storage
 
-### Cloud Native Infrastructure layers configuration Storage (Toaster-ToasterDB)
+### Infrastructure layers Configuration Management Database (CMDB). (Toaster-ToasterDB)
 You could set env variable `toasterurl` to point to TofuGu-Toaster, like:
 ```bash
 export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
@@ -67,7 +80,7 @@ To upload/update dimensions in Toaster from your Inventory Files repo you could 
 Please join the [Toaster-ToasterDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
 
 
-### Git-based Infrastructure layers configuration Storage (Inventory Files)
+### File-based Infrastructure layers configuration Storage. (Inventory Files)
 
 If env variable `toasterurl` is not set, TofuGu will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
 
@@ -212,27 +225,6 @@ Do not forget to create plugin-cache dir: `mkdir "$HOME/.terraform.d/plugin-cach
 
 `tofugu` is OpenTofu/Terraform version agnostic!
 Required external tools/binaries: `rsync`, `ln`
-
-## Why not Terragrunt?
-
-Not sure, but for me looks like same general idea, but for different cases.
-For example: https://terragrunt.gruntwork.io/docs/features/keep-your-terraform-code-dry/#keep-your-terraform-code-dry
-
-> In a separate repo, called, for example, live, you define the code for all of your environments, which now consists of just one terragrunt.hcl file per component (e.g. app/terragrunt.hcl, mysql/terragrunt.hcl, etc).
-
-And you need to configure/copy terragrunt.hcl (and maybe other files) to each folder/environment (prod,qa, stage) with subfolders like app,mysql,vpc
-But if I have 20 environments (stage1-stage20) and 50 units (app,mysql,vpc,eks,redis,....) then, if I need to add stage21 I will need to copy all of the files again.
-
-Maybe better when TF code and inventory split by the repos and adding new environment does not require any changes in the TF repo, only add stage21.json in the inventory repo and deploy every unit
-like
-```bash
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t vpc -- init
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t vpc -- apply -auto-approve
-
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t eks -- init
-./tofugu cook -o demo-org -d account:test-account -d datacenter:staging21 -t eks -- apply -auto-approve
-```
-P.S. I very respect terragrunt it is prod-grade tool! this "tool" is just go-learning :)
 
 ## License
 
