@@ -1,12 +1,13 @@
-# Cloud Native Inventory Manager for OpenTofu or Terraform
-Manage your infrastructure and environments with Inventory manager and OpenTofu/Terraform!
-Avoid duplication of the TF code! Reuse same code for multive enviroments with configuration in dedicated json files.
+# Infrastructure layers configuration orchestrator for OpenTofu or Terraform
+Manage your infrastructure across multiple environments (development, staging, and production) and multiple layers (like multiple servers, networks, storage, databases) efficiently!
+Avoid duplicating Terraform code (directory for each environment) by reusing it across multiple environments with dedicated JSON configuration files.
 
-**Written for learing Go** (and cobra and viper)
-
-Application manages inventory and executes opentofu with terraform variables.
-
-No need to manually create any `tfvars` or `variables` files/directives -> [empty variables.tf](examples/tofies/demo-org/vpc/variables.tf)
+- Environment/layer configuration stored outside the Terrafom/OpenTofu code
+- Terrafom/OpenTofu code, called **tofi**, should be generic enough to handle provided configuration to deploy same resources with different configurations
+- `tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code = resulting in full set of the Terraform code and configuration variables
+- After temporary folder is ready it executes `terraform` or `tofu` with specified parameters
+- Maintainins separate state files for each environment/layer = automaticaly/dynamic provides configuration for remote state managment (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration+terraform) stored in different `tfstate` files in remote storage (S3, GCS)
+- No need to manually create any `tfvars` or `variables` files/directives -> [empty variables.tf](examples/tofies/demo-org/vpc/variables.tf)
 
 ## Usage
 
@@ -38,9 +39,9 @@ Currently only `dimensions` with list of the required/expecting dimensions (from
 
 [tofi_manifest.json example](examples/tofies/demo-org/vpc/tofi_manifest.json)
 
-## Inventory (dimensions) Store
+## Infrastructure layers/dimensions configurations Storage
 
-### Cloud Native Inventory Storage (Toaster-ToasterDB)
+### Cloud Native Infrastructure layers configuration Storage (Toaster-ToasterDB)
 You could set env variable `toasterurl` to point to TofuGu-Toaster, like:
 ```bash
 export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
@@ -66,9 +67,9 @@ To upload/update dimensions in Toaster from your Inventory Files repo you could 
 Please join the [Toaster-ToasterDB beta-testers!](https://github.com/alt-dima/tofugu/issues/10)
 
 
-### Inventory Files repo
+### Git-based Infrastructure layers configuration Storage (Inventory Files)
 
-If env variable `toasterurl` is not set, TofuGu will use file-based inventory storage, by the path configured in `inventory_path`
+If env variable `toasterurl` is not set, TofuGu will use file-based configuration Storage (probably dedicated git repo), specified by the path configured in `inventory_path`.
 
 Examples:
 
