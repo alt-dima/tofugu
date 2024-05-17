@@ -40,16 +40,21 @@ var cookCmd = &cobra.Command{
 		tofuguStruct.ParseTofiManifest("tofi_manifest.json")
 		tofuguStruct.ParseDimensions()
 
-		backendConfig := tofuguStruct.SetupBackendConfig()
+		backendTofuguConfig := tofuguStruct.SetupBackendConfig()
 
 		tofuguStruct.PrepareTemp()
 
 		tofuguStruct.GenerateVarsByDims()
 		tofuguStruct.GenerateVarsByDimOptional("defaults")
 		tofuguStruct.GenerateVarsByEnvVars()
+		tofuguStruct.GenerateVarsByDimAndData("config", "backend", backendTofuguConfig)
 
 		//Local variables for child execution
 		forceCleanTempDir, _ := cmd.Flags().GetBool("clean")
+		var backendConfig []string
+		for param, value := range backendTofuguConfig {
+			backendConfig = append(backendConfig, "-backend-config="+param+"="+value.(string))
+		}
 		cmdArgs := args
 		if args[0] == "init" {
 			cmdArgs = append(cmdArgs, backendConfig...)
