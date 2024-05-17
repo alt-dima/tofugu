@@ -35,9 +35,7 @@ func (tofuguStruct *Tofugu) GetObjectFromViperByOrgOrDefault(keyName string) map
 	}
 }
 
-func (tofuguStruct *Tofugu) SetupBackendConfig() []string {
-	var backendFinalConfig []string
-
+func (tofuguStruct *Tofugu) SetupBackendConfig() map[string]interface{} {
 	var stateS3Path string
 	if !viper.IsSet(tofuguStruct.OrgName + ".backend") {
 		stateS3Path = stateS3Path + "org_" + tofuguStruct.OrgName + "/"
@@ -52,12 +50,13 @@ func (tofuguStruct *Tofugu) SetupBackendConfig() []string {
 	if len(backendTofuguConfig) == 0 {
 		log.Println("Tofugu: no backend config provied!")
 	}
+
+	var backendTofuguConfigMap = make(map[string]interface{}, len(backendTofuguConfig))
 	for param, value := range backendTofuguConfig {
-		replacedVar := strings.Replace(value.(string), "$tofugu_state_path", tofuguStruct.StateS3Path, 1)
-		backendFinalConfig = append(backendFinalConfig, "-backend-config="+param+"="+replacedVar)
+		backendTofuguConfigMap[param] = strings.Replace(value.(string), "$tofugu_state_path", tofuguStruct.StateS3Path, 1)
 	}
 
-	return backendFinalConfig
+	return backendTofuguConfigMap
 }
 
 func (tofuguStruct *Tofugu) GetDimData(dimensionKey string, dimensionValue string, skipOnNotFound bool) map[string]interface{} {

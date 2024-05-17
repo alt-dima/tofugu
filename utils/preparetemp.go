@@ -7,6 +7,10 @@ import (
 )
 
 func (tofuguStruct *Tofugu) PrepareTemp() {
+	if tofuguStruct.StateS3Path == "" {
+		log.Fatalf("StateS3Path is empty \n")
+	}
+
 	tmpFolderNameSuffix := tofuguStruct.OrgName + tofuguStruct.StateS3Path + tofuguStruct.TofiName
 	cmdTempDirFullPath := os.TempDir() + "/tofugu-" + GetMD5Hash(tmpFolderNameSuffix)
 
