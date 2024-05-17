@@ -1,5 +1,8 @@
 {
     "test-account": {
         "enable_dns_support": true
+    },
+    "prod-account": {
+        "enable_dns_support": true
     }
 }
