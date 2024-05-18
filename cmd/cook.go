@@ -34,8 +34,12 @@ var cookCmd = &cobra.Command{
 		tofuguStruct.ToasterUrl = os.Getenv("toasterurl")
 		tofuguStruct.DimensionsFlags, _ = cmd.Flags().GetStringSlice("dimension")
 		tofuguStruct.TofiPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("tofies_path") + "/" + tofuguStruct.OrgName + "/" + tofuguStruct.TofiName)
-		tofuguStruct.SharedModulesPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path"))
-		tofuguStruct.InventoryPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") + "/" + tofuguStruct.OrgName)
+		if tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path") != "" {
+			tofuguStruct.SharedModulesPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path"))
+		}
+		if tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") != "" {
+			tofuguStruct.InventoryPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") + "/" + tofuguStruct.OrgName)
+		}
 
 		tofuguStruct.ParseTofiManifest("tofi_manifest.json")
 		tofuguStruct.ParseDimensions()
