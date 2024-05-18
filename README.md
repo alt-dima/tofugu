@@ -123,7 +123,7 @@ provider "aws" {
 
 Config file (in YAML format) path maybe provided by the `--config` flag, for example: `
 ```bash
-./tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
+tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ```
 If `--config` flag is not set, then it will try to load from default location `$HOME/.tofugu`
 
@@ -161,11 +161,12 @@ defaults:
 must be set in the config file! With key:values specific for the backend provider being used in org!
 
 Other options contain hard-coded defaults:
-```go
-	viper.SetDefault("defaults.inventory_path", "examples/inventory")
-	viper.SetDefault("defaults.shared_modules_path", "examples/tofies/shared-modules")
-	viper.SetDefault("defaults.tofies_path", "examples/tofies")
-	viper.SetDefault("defaults.cmd_to_exec", "tofu")
+```yaml
+defaults:
+  inventory_path: "examples/inventory"
+  shared_modules_path: ""
+  tofies_path: "examples/tofies"
+  cmd_to_exec: "tofu"
 ```
 
 ## Shared modules support
@@ -245,7 +246,7 @@ Recommended to enable plugin_cache_dir to reuse providers.
 
 [.tofurc example](examples/.tofurc):
 
-```
+```ini
 plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
 plugin_cache_may_break_dependency_lock_file = true
 ```
