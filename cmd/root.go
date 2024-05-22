@@ -53,7 +53,7 @@ func initConfig() {
 	log.Println("TofuGu version:" + rootCmd.Version)
 
 	viper.SetDefault("defaults.inventory_path", "examples/inventory")
-	viper.SetDefault("defaults.shared_modules_path", "examples/tofies/shared-modules")
+	viper.SetDefault("defaults.shared_modules_path", "")
 	viper.SetDefault("defaults.tofies_path", "examples/tofies")
 	viper.SetDefault("defaults.cmd_to_exec", "tofu")
 

@@ -34,22 +34,31 @@ var cookCmd = &cobra.Command{
 		tofuguStruct.ToasterUrl = os.Getenv("toasterurl")
 		tofuguStruct.DimensionsFlags, _ = cmd.Flags().GetStringSlice("dimension")
 		tofuguStruct.TofiPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("tofies_path") + "/" + tofuguStruct.OrgName + "/" + tofuguStruct.TofiName)
-		tofuguStruct.SharedModulesPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path"))
-		tofuguStruct.InventoryPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") + "/" + tofuguStruct.OrgName)
+		if tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path") != "" {
+			tofuguStruct.SharedModulesPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path"))
+		}
+		if tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") != "" {
+			tofuguStruct.InventoryPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("inventory_path") + "/" + tofuguStruct.OrgName)
+		}
 
 		tofuguStruct.ParseTofiManifest("tofi_manifest.json")
 		tofuguStruct.ParseDimensions()
 
-		backendConfig := tofuguStruct.SetupBackendConfig()
+		backendTofuguConfig := tofuguStruct.SetupBackendConfig()
 
 		tofuguStruct.PrepareTemp()
 
 		tofuguStruct.GenerateVarsByDims()
 		tofuguStruct.GenerateVarsByDimOptional("defaults")
 		tofuguStruct.GenerateVarsByEnvVars()
+		tofuguStruct.GenerateVarsByDimAndData("config", "backend", backendTofuguConfig)
 
 		//Local variables for child execution
 		forceCleanTempDir, _ := cmd.Flags().GetBool("clean")
+		var backendConfig []string
+		for param, value := range backendTofuguConfig {
+			backendConfig = append(backendConfig, "-backend-config="+param+"="+value.(string))
+		}
 		cmdArgs := args
 		if args[0] == "init" {
 			cmdArgs = append(cmdArgs, backendConfig...)

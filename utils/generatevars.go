@@ -36,6 +36,14 @@ func (tofuguStruct *Tofugu) GenerateVarsByDimOptional(optionType string) {
 	}
 }
 
+func (tofuguStruct *Tofugu) GenerateVarsByDimAndData(optionType string, dimKey string, dimensionJsonMap map[string]interface{}) {
+	targetAutoTfvarMap := map[string]interface{}{
+		"tofugu_" + dimKey + "_" + optionType: dimensionJsonMap,
+	}
+	writeTfvarsMaps(targetAutoTfvarMap, dimKey+"_"+optionType, tofuguStruct.CmdWorkTempDir)
+	log.Println("TofuGu attached " + optionType + " in var.tofugu_" + dimKey + "_" + optionType)
+}
+
 func (tofuguStruct *Tofugu) GenerateVarsByEnvVars() {
 	targetAutoTfvarMap := make(map[string]interface{})
 

@@ -123,7 +123,7 @@ provider "aws" {
 
 Config file (in YAML format) path maybe provided by the `--config` flag, for example: `
 ```bash
-./tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
+tofugu --config path_to_config/tofuguconfig cook -o demo-org -d account:test-account -d datacenter:staging1 -t vpc -- init
 ```
 If `--config` flag is not set, then it will try to load from default location `$HOME/.tofugu`
 
@@ -149,7 +149,7 @@ gcp-org:
 - `inventory_path` =  relative path to the folder with jsons
 - `cmd_to_exec` = name of the binary to execute (`tofu` or `terraform`)
 - `backend` = Config values for backend provider. All the child key:values will be provided to `init` and `$tofugu_state_path` will be replaced by generated path.
-For example, it will look like `tofu init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
+For example, when you will execute `tofugu cook ...... -- init`, TofuGu actually will execute `init -backend-config=bucket=gcp-tfstates -backend-config=prefix=account_free-tier/free_instance.tfstate`
 
 At least 
 ```yaml
@@ -161,11 +161,12 @@ defaults:
 must be set in the config file! With key:values specific for the backend provider being used in org!
 
 Other options contain hard-coded defaults:
-```go
-	viper.SetDefault("defaults.inventory_path", "examples/inventory")
-	viper.SetDefault("defaults.shared_modules_path", "examples/tofies/shared-modules")
-	viper.SetDefault("defaults.tofies_path", "examples/tofies")
-	viper.SetDefault("defaults.cmd_to_exec", "tofu")
+```yaml
+defaults:
+  inventory_path: "examples/inventory"
+  shared_modules_path: ""
+  tofies_path: "examples/tofies"
+  cmd_to_exec: "tofu"
 ```
 
 ## Shared modules support
@@ -185,9 +186,9 @@ Examples:
 - [Shared module for VPC creation](examples/tofies/shared-modules/create_vpc)
 - [Shared module for VPC creation used in code](examples/tofies/demo-org/vpc/main.tf#L3)
 
-## Remote state in S3
+## Remote state (Terraform Backend where state data files are stored)
 
-AWS, Google Cloud and some other backends are supported! You could configure any backend provider in `tofugu config file`
+AWS, Google Cloud and some other backends are supported! You could configure any backend provider in [TofuGu Config file](#hometofugu)
 
 [For AWS S3 your terraform code (`tofi`) should contains at least:](examples/tofies/demo-org/vpc/versions.tf#L4):
 ```
@@ -209,6 +210,35 @@ If for the `demo-org` config `bucket` is NOT set, then `$tofugu_state_path` will
 
 This could be useful, if you want to store by default tfstate for all the organisations in the same/default bucket `default-tfstates` but for some specific organisation you need to store tfstates in dedicated bucket `demo-org-tfstates`
 
+## Data Source Configuration (data "terraform_remote_state")
+
+To simplify "Data Source Configuration" (`data "terraform_remote_state" "tfstate" { }`) will be nice to have backend config values as tfvars.
+
+`var.tofugu_backend_config` will contain all the parameters from [TofuGu config (backend Section)](#hometofugu)
+
+[For example, for AWS S3](examples/tofies/demo-org/vpc/data.tf):
+```
+data "terraform_remote_state" "network" {
+  backend = "s3"
+  config = {
+    bucket = var.tofugu_backend_config.bucket
+    key    = "network/terraform.tfstate"
+    region = var.tofugu_backend_config.region
+  }
+}
+```
+[And for GCS](examples/tofies/gcp-org/free_instance/data.tf):
+```
+data "terraform_remote_state" "free_instance" {
+  backend = "gcs"
+  config = {
+    bucket  = var.tofugu_backend_config.bucket
+    prefix  = "account_free-tier/free_instance.tfstate"
+  }
+}
+```
+
+You will set `key/prefix` to another tofie's tfstate, which outputs you want to use.
 
 ## $HOME/.tofurc
 
@@ -216,7 +246,7 @@ Recommended to enable plugin_cache_dir to reuse providers.
 
 [.tofurc example](examples/.tofurc):
 
-```
+```ini
 plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
 plugin_cache_may_break_dependency_lock_file = true
 ```
