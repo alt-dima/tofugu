@@ -1,5 +1,8 @@
 {
-    "prod-account": {
-      "cidr": "10.3.0.0/16"
-    }
+  "parent": {
+    "account": "prod-account"
+  },
+  "prod-account": {
+    "cidr": "10.100.0.0/16"
+  }
 }

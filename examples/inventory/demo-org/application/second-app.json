@@ -1,0 +1,14 @@
+{
+    "http_services": {
+        "first-service": {
+            "cmd": "sh -c sleep 10",
+            "workDir": "app"
+        }
+    },
+    "rabbitmq_processors": {
+        "first-service": {
+            "cmd": "sh -c sleep 20",
+            "workDir": "app"
+        }
+    }
+}

@@ -1,5 +1,5 @@
 {
-    "services": {
+    "http_services": {
         "first-service": {
             "cmd": "sh -c sleep 10",
             "workDir": "app"

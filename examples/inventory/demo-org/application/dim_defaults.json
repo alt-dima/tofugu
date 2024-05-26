@@ -1,0 +1,24 @@
+{
+    "http_services": {
+        "workDir": "app",
+        "test-account": {
+            "cpu_request": 10,
+            "mem_request": 200
+        },
+        "prod-account": {
+            "cpu_request": 100,
+            "mem_request": 300
+        }
+    },
+    "rabbitmq_processors": {
+        "workDir": "app",
+        "test-account": {
+            "cpu_request": 10,
+            "mem_request": 200
+        },
+        "prod-account": {
+            "cpu_request": 100,
+            "mem_request": 300
+        }
+    }
+}

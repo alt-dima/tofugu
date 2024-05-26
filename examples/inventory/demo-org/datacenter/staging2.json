@@ -1,5 +1,8 @@
 {
-    "test-account": {
-      "cidr": "10.2.0.0/16"
-    }
+  "dimensions": {
+    "account": "test-account"
+  },
+  "test-account": {
+    "cidr": "10.2.0.0/16"
+  }
 }
