@@ -95,7 +95,7 @@ Examples:
 When you set dimensions in the tofugu flags `-d datacenter:staging1 `, TofuGu will provide you inside tf-code next variables:
 
 - var.tofugu_datacenter_name = will contain string `staging1`
-- var.tofugu_datacenter_manifest = will contain whole object from `staging1.json`
+- var.tofugu_datacenter_data = will contain whole object from `staging1.json`
 - var.tofugu_datacenter_defaults = will contain whole object from `dim_defaults.json` IF file `dim_defaults.json` exists!
 
 Examples:
