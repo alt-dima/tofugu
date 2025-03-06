@@ -1,0 +1,4 @@
+{
+    "vpc": {},
+    "deploy_app": {"include":"tofugu_all"}
+}
