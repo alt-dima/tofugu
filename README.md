@@ -84,18 +84,19 @@ You could set the env variable `toasterurl` to point to TofuGu-Toaster, like:
 export toasterurl='https://accountid:accountpass@toaster.altuhov.su'
 ```
 
-To generate your own credentials please go to [https://toaster.altuhov.su/](https://toaster.altuhov.su/), fill the form with Account Name, Email, and press `Create User` and you will receive generated credentials and a ready-to-use export command like:
+To generate your own credentials please go to [https://toaster.altuhov.su/](https://toaster.altuhov.su/), fill the form with Account Name, Email, and press `Create Account` and you will receive generated credentials and a ready-to-use export command like:
 ```
-Please execute in shell to set toasterurl:
-
 export toasterurl=https://6634b72292e9e996105de19e:generatedpassword@toaster.altuhov.su
 ```
+<img width="500" alt="Screenshot_20250915_222318" src="https://github.com/user-attachments/assets/062848dc-e67d-48c6-adfe-9e1b9fddc7fd" />
 
 With the correct `toasterurl`, TofuGu will connect and receive all the required dimension data from the Toaster-ToasterDB.
 An additional parameter could be passed to tofugu `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
 
 **Toaster-ToasterDB** provides additional features for your CI and CD pipelines. For example, you need to receive a [first-app.json](examples/inventory/demo-org/application/first-app.json) in the CI pipeline, to check the application configuration.
 Or you need a list of all the datacenters in the [datacenter dimension](examples/inventory/demo-org/datacenter) in a [Jenkins drop-down](https://github.com/alt-dima/tofugu/issues/10#issuecomment-2090932416) list to select to which datacenter to deploy the application.
+
+<img width="800" alt="Screenshot_20250915_222357" src="https://github.com/user-attachments/assets/735a4045-eb74-4fc0-b46d-aa01f655c7d0" />
 
 [Swagger API docs (full API documentation and examples)](https://app.swaggerhub.com/apis-docs/altuhovsu/tofugu_toaster_api/)
 
