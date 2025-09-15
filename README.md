@@ -1,13 +1,36 @@
 # Infrastructure layers configuration orchestrator for OpenTofu or Terraform
-Manage your infrastructure across multiple environments (development, staging, and production) and multiple layers (like servers, networks, storage, databases) efficiently!
-
-Avoid duplicating Terraform code (directory for each environment) by reusing it across multiple environments with dedicated JSON configuration files.
+`tofugu` is an infrastructure layers configuration orchestrator that dynamically manages OpenTofu or Terraform. It provides infrastructure configuration definitions from outside the Terraform code, using either files or an Infrastructure Layers Configuration Management Database (CMDB) called Toaster-ToasterDB. This allows you to reuse Terraform code across multiple environments instead of duplicating it.
 
 - Environment/layer configuration stored outside the Terraform/OpenTofu code
 - Terraform/OpenTofu code, called **tofi**, should be generic enough to handle provided configuration to deploy the same resources with different configurations
 - `tfvars` and `variables` are automatically generated in the temporary folder with selected terraform code (**tofi**) resulting in a full set of the Terraform code and configuration variables
 - After the temporary folder is ready, it executes `terraform` or `tofu` with specified parameters
 - Maintains separate state files for each environment/layer, automatically providing configuration for remote state management (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration + terraform) is stored in different `tfstate` files in remote storage (S3, GCS)
+
+## Quick start with AI Coding Assistants
+
+Getting started with `tofugu` is even easier using AI coding assistants:
+
+1. Open the repository in your preferred editor with an AI assistant installed:
+   - GitHub Copilot in VS Code
+   - Cursor
+   - Claude/Anthropic
+   - WindSurf
+   - Cline
+
+2. Ask questions like:
+   - "How do I set up tofugu for AWS resources?"
+   - "Help me create a new tofi for a GCP instance"
+   - "How do I use Toaster-ToasterDB with tofugu?"
+   - "Show me how to pass environment variables to my terraform code"
+
+These instructions provide context about:
+- The architecture and key concepts of tofugu
+- How to work with tofies, dimensions, and inventory sources
+- Integration with Toaster-ToasterDB for centralized configuration
+- Project-specific conventions and workflows
+
+For more complex tasks, you can ask the AI assistant to guide you step-by-step through creating configurations, setting up the backend, or troubleshooting deployment issues.
 
 ## What about alternative tools?
 
