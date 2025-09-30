@@ -21,6 +21,9 @@ func parseDimArgs(dimensionsArgs []string) map[string]string {
 	parsedDimArgs := make(map[string]string)
 	for _, dimension := range dimensionsArgs {
 		dimensionSlice := strings.SplitN(dimension, ":", 2)
+		if len(dimensionSlice) != 2 {
+			log.Fatalln("Invalid dimension format: " + dimension + ". Expected format: key:value")
+		}
 		if strings.HasPrefix(dimensionSlice[1], "dim_") {
 			log.Fatalln("dimension " + dimension + " with dim_ prefix can't be passed with -d arg")
 		}
