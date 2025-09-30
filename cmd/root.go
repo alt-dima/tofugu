@@ -36,7 +36,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	//cobra.OnInitialize(initConfig)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
@@ -68,6 +68,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(home)
+		viper.AddConfigPath(".")
 		viper.SetConfigName(".tofugu")
 	}
 
@@ -77,5 +78,6 @@ func initConfig() {
 		log.Println("TofuGu using config file:", viper.ConfigFileUsed())
 	} else {
 		log.Println(err.Error())
+		log.Println("TofuGu using default config with inventory in examples/inventory and tofies in examples/tofies")
 	}
 }

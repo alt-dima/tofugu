@@ -19,6 +19,9 @@ var cookCmd = &cobra.Command{
 	Short: "Execute OpenTofu",
 	Args:  cobra.MinimumNArgs(1),
 	Long:  `Execute OpenTofu with generated config from inventory and parameters after --`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		//Creating signal to be handled and send to the child tofu/terraform
 		sigs := make(chan os.Signal, 2)
@@ -28,10 +31,35 @@ var cookCmd = &cobra.Command{
 		// Creating Tofug shared structure and filling with values
 		tofuguStruct := &utils.Tofugu{}
 
+		toasterUrl := os.Getenv("toasterurl")
+		if toasterUrl != "" {
+			// validate URL format and remove trailing slash if present
+			if strings.HasSuffix(toasterUrl, "/") {
+				toasterUrl = strings.TrimRight(toasterUrl, "/")
+			}
+
+			// Basic validation for toasterUrl format
+			if !strings.HasPrefix(toasterUrl, "https://") {
+				log.Fatalf("Error: toasterUrl must start with https://")
+			}
+
+			// Check if URL contains credentials and correct domain
+			urlParts := strings.Split(strings.TrimPrefix(toasterUrl, "https://"), "@")
+			if len(urlParts) != 2 || urlParts[1] != "toaster.altuhov.su" {
+				log.Fatalf("Error: toasterUrl must be in format https://ACCOUNTID:PASSWORD@toaster.altuhov.su")
+			}
+
+			// Validate credential part has both account ID and password
+			credParts := strings.Split(urlParts[0], ":")
+			if len(credParts) != 2 || credParts[0] == "" || credParts[1] == "" {
+				log.Fatalf("Error: toasterUrl credentials must include both ACCOUNTID and PASSWORD")
+			}
+		}
+
 		tofuguStruct.TofiName, _ = cmd.Flags().GetString("tofi")
 		tofuguStruct.OrgName, _ = cmd.Flags().GetString("org")
 		tofuguStruct.Workspace, _ = cmd.Flags().GetString("workspace")
-		tofuguStruct.ToasterUrl = os.Getenv("toasterurl")
+		tofuguStruct.ToasterUrl = toasterUrl
 		tofuguStruct.DimensionsFlags, _ = cmd.Flags().GetStringSlice("dimension")
 		tofuguStruct.TofiPath, _ = filepath.Abs(tofuguStruct.GetStringFromViperByOrgOrDefault("tofies_path") + "/" + tofuguStruct.OrgName + "/" + tofuguStruct.TofiName)
 		if tofuguStruct.GetStringFromViperByOrgOrDefault("shared_modules_path") != "" {
