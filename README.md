@@ -7,6 +7,20 @@
 - After the temporary folder is ready, it executes `terraform` or `tofu` with specified parameters
 - Maintains separate state files for each environment/layer, automatically providing configuration for remote state management (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration + terraform) is stored in different `tfstate` files in remote storage (S3, GCS)
 
+## Quick start with demo configuration
+
+1. [Download release](https://github.com/alt-dima/tofugu/releases) version >= 0.5.0
+2. Install [OpenTofu](https://opentofu.org/docs/intro/install/)
+3. Execute to generate simpe demo configuration with connection to demo account in [Infrastructure layers Configuration Management Database (CMDB). (Toaster-ToasterDB)](#infrastructure-layers-configuration-management-database-cmdb-toaster-toasterdb):
+```bash
+tofugu init
+```
+To generate with [file based inventory](#infrastructure-layersdimensions-configurations-storage):
+```bash
+tofugu init --toaster=false
+```
+4. Follow on-screen instructions
+
 ## Quick start with AI Coding Assistants
 
 Getting started with `tofugu` is even easier using AI coding assistants:
