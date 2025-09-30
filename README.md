@@ -15,7 +15,7 @@
 ```bash
 tofugu init
 ```
-To generate with [file based inventory](#infrastructure-layersdimensions-configurations-storage):
+To generate with [file based inventory](#file-based-infrastructure-layers-configuration-storage-inventory-files):
 ```bash
 tofugu init --toaster=false
 ```
