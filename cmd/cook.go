@@ -128,6 +128,8 @@ var cookCmd = &cobra.Command{
 			log.Println("TofuGu removed tofi temp dir: " + tofuguStruct.CmdWorkTempDir)
 		}
 
+		tofuguStruct.SendHistoryData(cmdToExec, cmdArgs, exitCodeFinal)
+
 		log.Printf("TofuGu: %v finished with code %v", cmdToExec, exitCodeFinal)
 		os.Exit(exitCodeFinal)
 	},
