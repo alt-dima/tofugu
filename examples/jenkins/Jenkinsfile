@@ -1,28 +1,40 @@
 properties([
   parameters([
-    [
-      $class: 'ChoiceParameter',
-      choiceType: 'PT_SINGLE_SELECT',
+    choice(
       name: 'Environment',
-      script: [
-        $class: 'ScriptlerScript',
-        scriptlerScriptId:'Environments.groovy'
-      ]
-    ],
+      choices: ['prod', 'stage'],
+      description: 'Select the environment'
+    ),
     [
       $class: 'CascadeChoiceParameter',
       choiceType: 'PT_SINGLE_SELECT',
       name: 'Host',
+      description: 'Select the host',
       referencedParameters: 'Environment',
       script: [
-        $class: 'ScriptlerScript',
-        scriptlerScriptId:'HostsInEnv.groovy',
-        parameters: [
-          [name:'Environment', value: '$Environment']
+        $class: 'GroovyScript',
+        fallbackScript: [
+          classpath: [],
+          sandbox: true,
+          script: 'return ["ERROR"]'
+        ],
+        script: [
+          classpath: [],
+          sandbox: true,
+          script: '''
+            switch(Environment) {
+              case "prod":
+                return ["HostA", "HostB"]
+              case "stage":
+                return ["HostC", "HostD"]
+              default:
+                return ["Select Environment first"]
+            }
+          '''
         ]
       ]
-   ]
- ])
+    ]
+  ])
 ])
 
 pipeline {
