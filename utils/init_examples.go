@@ -17,14 +17,18 @@ properties([
           sandbox: true,
           script: '''
             import groovy.json.JsonSlurper
-            def url = new URL('https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su/api/dimension/demo-org/account?workspace=master&fallbacktomaster=true&needdimdata=false')
-            def connection = url.openConnection()
-            connection.setRequestMethod('GET')
-            
+
             try {
-                def response = new JsonSlurper().parse(connection.inputStream)
-                if (response.Dimensions) {
-                    return response.Dimensions.collect { it.DimValue }.unique()
+                def url = new URL('https://toaster.altuhov.su/api/dimension/demo-org/account?workspace=master&fallbacktomaster=true&needdimdata=false')
+                def connection = url.openConnection()
+                connection.setRequestProperty('Authorization', 'Basic NjYyY2FiN2M1ZTExNjgxOTczOGIwMWZlOnN1cGVydG9hc3Rlcg==')
+                connection.requestMethod = 'GET'
+                
+                def response = connection.content.text
+                def result = new JsonSlurper().parseText(response)
+                
+                if (result.Dimensions) {
+                    return result.Dimensions.collect { it.DimValue }.unique()
                 } else {
                     return ["No accounts found"]
                 }
