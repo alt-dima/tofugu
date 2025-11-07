@@ -92,7 +92,7 @@ pipeline {
     }
     stage('Tofugu') {
       steps {
-        git 'https://github.com/alt-dima/tofugu.git'
+        git url: 'https://github.com/alt-dima/tofugu.git', branch: 'main'
         sh 'wget https://github.com/alt-dima/tofugu/releases/download/v0.5.0/tofugu_0.5.0_linux_arm64.tar.gz'
         sh 'tar -xvf tofugu_0.5.0_linux_arm64.tar.gz'
         sh './tofugu'
