@@ -32,3 +32,8 @@ This project provides a way to deploy a pre-configured Jenkins instance to any K
 9.  Scroll to the end of the console output. You should see a plan output from OpenTofu and a question: "Do you want to apply the changes?".
 
 10. Click **Proceed** and watch as the apply stage is performed.
+
+<img width="1432" height="1188" alt="2025-11-07_20-41" src="https://github.com/user-attachments/assets/2d7ea70e-f123-48d7-96fb-5205b04b4238" />
+<img width="2924" height="1306" alt="2025-11-07_20-41_1" src="https://github.com/user-attachments/assets/5a0fda74-b0d4-4370-9627-e60cd41109c9" />
+<img width="3258" height="1724" alt="2025-11-07_20-42" src="https://github.com/user-attachments/assets/2079b624-f21b-482d-afdb-64efddeb0d2a" />
+<img width="3118" height="1214" alt="2025-11-07_20-42_1" src="https://github.com/user-attachments/assets/554cc744-ca25-4c43-8913-40678874570f" />
