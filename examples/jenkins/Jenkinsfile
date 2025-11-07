@@ -107,8 +107,8 @@ pipeline {
           sh "curl -L -o tofu_1.10.7_linux_${archSuffix}.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_${archSuffix}.tar.gz"
           sh "tar -xvf tofu_1.10.7_linux_${archSuffix}.tar.gz"
           
-          sh "curl -L -o tofugu_0.5.0_linux_${archSuffix}.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.0/tofugu_0.5.0_linux_${archSuffix}.tar.gz"
-          sh "tar -xvf tofugu_0.5.0_linux_${archSuffix}.tar.gz"
+          sh "curl -L -o tofugu_0.5.1_linux_${archSuffix}.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.1/tofugu_0.5.1_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf tofugu_0.5.1_linux_${archSuffix}.tar.gz"
         }
       }
     }
