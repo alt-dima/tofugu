@@ -127,6 +127,7 @@ defaults:
         toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
       }
       steps {
+        sh "ls -la"
         sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- init"
         sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- plan"
       }
