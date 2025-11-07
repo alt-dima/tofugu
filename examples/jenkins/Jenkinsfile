@@ -19,10 +19,9 @@ properties([
             import groovy.json.JsonSlurper
 
             try {
-              withCredentials([string(credentialsId: 'tofugu-toaster', variable: 'API_SECRET')]) {
                 def url = new URL('https://toaster.altuhov.su/api/dimension/demo-org/account?workspace=master&fallbacktomaster=true&needdimdata=false')
                 def connection = url.openConnection()
-                connection.setRequestProperty('Authorization', "Basic ${API_SECRET}")
+                connection.setRequestProperty('Authorization', 'Basic NjYyY2FiN2M1ZTExNjgxOTczOGIwMWZlOnN1cGVydG9hc3Rlcg==')
                 connection.requestMethod = 'GET'
                 
                 def response = connection.content.text
@@ -33,7 +32,6 @@ properties([
                 } else {
                     return ["No accounts found"]
                 }
-              }
             } catch (Exception e) {
                 return ["Error: ${e.message}"]
             }
