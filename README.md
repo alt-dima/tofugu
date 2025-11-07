@@ -13,6 +13,7 @@ You will need any Kubernetes cluster (best small temporary like Podman+Kind or M
 Check that kubectl context poiting to this test cluster! Not Production!
 
 For a full end-to-end example of using TofuGu in a CI/CD pipeline, see the pre-configured Jenkins deployment in [examples/jenkins/README.md](examples/jenkins/README.md).
+<img width="1432" height="1188" alt="2025-11-07_20-41" src="https://github.com/user-attachments/assets/76a6e8b5-16cc-4818-840e-22603e38bc63" />
 
 ## Quick start locally with demo configuration
 
