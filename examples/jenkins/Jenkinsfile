@@ -122,13 +122,15 @@ defaults:
 '''
       }
     }
-    stage('TofuGu Plan') {
+    stage('TofuGu Plan and Apply') {
       environment {
         toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
       }
       steps {
         sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- init"
         sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- plan"
+        input 'Do you want to apply the changes?'
+        sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- apply -auto-approve"
       }
     }
   }
