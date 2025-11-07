@@ -18,7 +18,7 @@ controller:
                           url('https://github.com/alt-dima/tofugu.git')
                           credentials('')
                         }
-                        branch('jenkis')
+                        branch('main')
                       }
                     }
                     scriptPath('examples/jenkins/Jenkinsfile')
@@ -47,4 +47,5 @@ controller:
 # Configure persistent storage using host path for development and testing
 persistence:
   enabled: false
+  # You could use file jenkins-pvc.yaml to create a PV and PVC with hostPath and use pvc here:
   # existingClaim: jenkins-pvc
