@@ -90,12 +90,24 @@ pipeline {
         echo "Selected data center: ${params.DataCenter}"
       }
     }
+    stage('Install OpenTofu') {
+      steps {
+        sh "curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh"
+        sh "chmod +x install-opentofu.sh"
+        sh "./install-opentofu.sh --skip-verify --install-method standalone"
+        sh "rm -f install-opentofu.sh"
+      }
+    }
     stage('Tofugu') {
+      environment {
+        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
+      }
       steps {
         git url: 'https://github.com/alt-dima/tofugu.git', branch: 'main'
         sh 'curl -L -o tofugu_0.5.0_linux_arm64.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.0/tofugu_0.5.0_linux_arm64.tar.gz'
         sh 'tar -xvf tofugu_0.5.0_linux_arm64.tar.gz'
         sh './tofugu'
+        sh 'opentofu version'
         sh 'ls -la'
       }
     }
