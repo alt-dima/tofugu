@@ -93,10 +93,23 @@ pipeline {
     }
     stage('Install OpenTofu and TofuGu') {
       steps {
-        sh 'curl -L -o tofu_1.10.7_linux_arm64.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_arm64.tar.gz'
-        sh 'tar -xvf tofu_1.10.7_linux_arm64.tar.gz'
-        sh 'curl -L -o tofugu_0.5.0_linux_arm64.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.0/tofugu_0.5.0_linux_arm64.tar.gz'
-        sh 'tar -xvf tofugu_0.5.0_linux_arm64.tar.gz'
+        script {
+          def arch = sh(script: 'uname -m', returnStdout: true).trim()
+          def archSuffix
+          if (arch == 'aarch64' || arch == 'arm64') {
+            archSuffix = 'arm64'
+          } else if (arch == 'x86_64') {
+            archSuffix = 'amd64'
+          } else {
+            error "Unsupported architecture: ${arch}"
+          }
+
+          sh "curl -L -o tofu_1.10.7_linux_${archSuffix}.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf tofu_1.10.7_linux_${archSuffix}.tar.gz"
+          
+          sh "curl -L -o tofugu_0.5.0_linux_${archSuffix}.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.0/tofugu_0.5.0_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf tofugu_0.5.0_linux_${archSuffix}.tar.gz"
+        }
       }
     }
     stage('Tofugu') {
