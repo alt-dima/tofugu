@@ -118,7 +118,7 @@ pipeline {
 defaults:
   tofies_path: examples/tofies
   inventory_path: examples/inventory
-  cmd_to_exec: ./tofu
+  cmd_to_exec: /home/jenkins/agent/workspace/tofugu-pipeline/tofu
 '''
       }
     }
