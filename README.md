@@ -7,7 +7,14 @@
 - After the temporary folder is ready, it executes `terraform` or `tofu` with specified parameters
 - Maintains separate state files for each environment/layer, automatically providing configuration for remote state management (different path on the storage regarding configured layers/dimensions). So the deployed set (configuration + terraform) is stored in different `tfstate` files in remote storage (S3, GCS)
 
-## Quick start with demo configuration
+## Quick start with Jenkins and demo configuration
+
+You will need any Kubernetes cluster (best small temporary like Podman+Kind or MiniKube).
+Check that kubectl context poiting to this test cluster! Not Production!
+
+For a full end-to-end example of using TofuGu in a CI/CD pipeline, see the pre-configured Jenkins deployment in [examples/jenkins/README.md](examples/jenkins/README.md).
+
+## Quick start locally with demo configuration
 
 1. [Download release](https://github.com/alt-dima/tofugu/releases) version >= 0.5.0
 2. Install [OpenTofu](https://opentofu.org/docs/intro/install/)
@@ -108,7 +115,7 @@ With the correct `toasterurl`, TofuGu will connect and receive all the required 
 An additional parameter could be passed to tofugu `-w workspacename`. In general, `workspacename` is the branch name of the source repo where the dimension is stored. If TofuGu-Toaster does not find the dimension with the specified `workspacename`, it will try to return the dimension from the `master` workspace/branch!
 
 **Toaster-ToasterDB** provides additional features for your CI and CD pipelines. For example, you need to receive a [first-app.json](examples/inventory/demo-org/application/first-app.json) in the CI pipeline, to check the application configuration.
-Or you need a list of all the datacenters in the [datacenter dimension](examples/inventory/demo-org/datacenter) in a [Jenkins drop-down](https://github.com/alt-dima/tofugu/issues/10#issuecomment-2090932416) list to select to which datacenter to deploy the application.
+Or you need a list of all the datacenters in the [datacenter dimension](examples/inventory/demo-org/datacenter) in a [Jenkins drop-down](examples/jenkins/README.md) list to select to which datacenter to deploy the application.
 
 <img width="800" alt="Screenshot_20250915_222357" src="https://github.com/user-attachments/assets/735a4045-eb74-4fc0-b46d-aa01f655c7d0" />
 

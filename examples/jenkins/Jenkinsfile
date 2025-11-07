@@ -1,0 +1,152 @@
+properties([
+  parameters([
+    [
+      $class: 'CascadeChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'Account',
+      description: 'Select the account',
+      script: [
+        $class: 'GroovyScript',
+        fallbackScript: [
+          classpath: [],
+          sandbox: true,
+          script: 'return ["ERROR: Failed to fetch accounts"]'
+        ],
+        script: [
+          classpath: [],
+          sandbox: true,
+          script: '''
+            import groovy.json.JsonSlurper
+
+            try {
+                def url = new URL('https://toaster.altuhov.su/api/dimension/example-org/account?workspace=master&fallbacktomaster=true&needdimdata=false')
+                def connection = url.openConnection()
+                connection.setRequestProperty('Authorization', 'Basic NjYyY2FiN2M1ZTExNjgxOTczOGIwMWZlOnN1cGVydG9hc3Rlcg==')
+                connection.requestMethod = 'GET'
+                
+                def response = connection.content.text
+                def result = new JsonSlurper().parseText(response)
+                
+                if (result.Dimensions) {
+                    return result.Dimensions.collect { it.DimValue }.unique()
+                } else {
+                    return ["No accounts found"]
+                }
+            } catch (Exception e) {
+                return ["Error: ${e.message}"]
+            }
+          '''
+        ]
+      ]
+    ],
+    [
+      $class: 'CascadeChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'DataCenter',
+      description: 'Select the Data Center',
+      script: [
+        $class: 'GroovyScript',
+        fallbackScript: [
+          classpath: [],
+          sandbox: true,
+          script: 'return ["ERROR: Failed to fetch data centers"]'
+        ],
+        script: [
+          classpath: [],
+          sandbox: true,
+          script: '''
+            import groovy.json.JsonSlurper
+
+            try {
+                def url = new URL('https://toaster.altuhov.su/api/dimension/example-org/datacenter?workspace=master&fallbacktomaster=true&needdimdata=false')
+                def connection = url.openConnection()
+                connection.setRequestProperty('Authorization', 'Basic NjYyY2FiN2M1ZTExNjgxOTczOGIwMWZlOnN1cGVydG9hc3Rlcg==')
+                connection.requestMethod = 'GET'
+                
+                def response = connection.content.text
+                def result = new JsonSlurper().parseText(response)
+                
+                if (result.Dimensions) {
+                    return result.Dimensions.collect { it.DimValue }.unique()
+                } else {
+                    return ["No accounts found"]
+                }
+            } catch (Exception e) {
+                return ["Error: ${e.message}"]
+            }
+          '''
+        ]
+      ]
+    ]
+  ])
+])
+
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        git url: 'https://github.com/alt-dima/tofugu.git', branch: 'main'
+        echo "Selected account: ${params.Account}"
+        echo "Selected data center: ${params.DataCenter}"
+      }
+    }
+    stage('Install OpenTofu and TofuGu') {
+      steps {
+        script {
+          def arch = sh(script: 'uname -m', returnStdout: true).trim()
+          def archSuffix
+          if (arch == 'aarch64' || arch == 'arm64') {
+            archSuffix = 'arm64'
+          } else if (arch == 'x86_64') {
+            archSuffix = 'amd64'
+          } else {
+            error "Unsupported architecture: ${arch}"
+          }
+
+          sh "curl -L -o tofu_1.10.7_linux_${archSuffix}.tar.gz https://github.com/opentofu/opentofu/releases/download/v1.10.7/tofu_1.10.7_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf tofu_1.10.7_linux_${archSuffix}.tar.gz -C /tmp"
+          
+          sh "curl -L -o tofugu_0.5.1_linux_${archSuffix}.tar.gz https://github.com/alt-dima/tofugu/releases/download/v0.5.1/tofugu_0.5.1_linux_${archSuffix}.tar.gz"
+          sh "tar -xvf tofugu_0.5.1_linux_${archSuffix}.tar.gz"
+        }
+      }
+    }
+    stage('Create .tofugu config') {
+      steps {
+        writeFile file: '.tofugu', text: '''
+defaults:
+  tofies_path: examples/tofies
+  inventory_path: examples/inventory
+  cmd_to_exec: /tmp/tofu
+'''
+      }
+    }
+    stage('TofuGu Plan') {
+      environment {
+        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
+      }
+      steps {
+        ansiColor('xterm') {
+          sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- init"
+          sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- plan"
+        }
+      }
+    }
+    stage('Approval') {
+      steps {
+        input 'Do you want to apply the changes?'
+      }
+    }
+    stage('TofuGu Apply') {
+      environment {
+        toasterurl = 'https://662cab7c5e116819738b01fe:supertoaster@toaster.altuhov.su'
+      }
+      steps {
+        ansiColor('xterm') {
+          sh "./tofugu cook -o example-org -d account:${params.Account} -d datacenter:${params.DataCenter} -t demo -- apply -auto-approve"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+controller:
+  jenkinsUrl: http://127.0.0.1:8080/
+  # Jenkins Configuration as Code (JCasC)
+  JCasC:
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: "Jenkins For TofuGu Toaster Demo"
+      pipeline-job: |
+        jobs:
+          - script: >
+              pipelineJob('tofugu-pipeline') {
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url('https://github.com/alt-dima/tofugu.git')
+                          credentials('')
+                        }
+                        branch('main')
+                      }
+                    }
+                    scriptPath('examples/jenkins/Jenkinsfile')
+                    lightweight()
+                  }
+                }
+              }
+  additionalPlugins:
+    - uno-choice:2.8.8
+    - job-dsl:1.93
+    - ansicolor:1.0.6
+  scriptApproval:
+    - "method java.net.HttpURLConnection setRequestMethod java.lang.String"
+    - "method java.net.URL openConnection"
+    - "method java.net.URLConnection getContent"
+    - "method java.net.URLConnection setRequestProperty java.lang.String java.lang.String"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getText java.io.InputStream"
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "256Mi"
+    limits:
+      cpu: "3"
+      memory: "2Gi"
+
+# Configure persistent storage using host path for development and testing
+persistence:
+  enabled: false
+  # You could use file jenkins-pvc.yaml to create a PV and PVC with hostPath and use pvc here:
+  # existingClaim: jenkins-pvc
