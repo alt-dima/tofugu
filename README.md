@@ -289,11 +289,6 @@ plugin_cache_may_break_dependency_lock_file = true
 ```
 Do not forget to create the plugin-cache dir: `mkdir "$HOME/.terraform.d/plugin-cache"`
 
-## Compatibility
-
-`tofugu` is OpenTofu/Terraform version agnostic!
-Required external tools/binaries: `rsync`, `ln`
-
 ## License
 
 `tofugu` is licensed with Apache License Version 2.0.
